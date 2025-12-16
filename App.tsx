@@ -6,15 +6,11 @@ import { analyzeImageWithGemini } from './services/geminiService';
 
 const App: React.FC = () => {
   // --- ENVIRONMENT VARIABLE HANDLING ---
-  // Mengambil API Key dari Environment Variable (Netlify/System)
-  // Tidak ada UI untuk input manual.
+  // LOGIKA PENTING: Vite (npm build) secara default HANYA mengizinkan variable yang diawali "VITE_"
+  // untuk keamanan client-side.
   const API_KEY = (() => {
     try {
-      // 1. Cek process.env (Standard Node/Netlify)
-      if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
-        return process.env.API_KEY;
-      }
-      // 2. Cek import.meta.env (Vite standard)
+      // 1. Cek import.meta.env (Cara Modern/Vite)
       // @ts-ignore
       if (typeof import.meta !== 'undefined' && import.meta.env) {
         // @ts-ignore
@@ -22,8 +18,14 @@ const App: React.FC = () => {
         // @ts-ignore
         if (import.meta.env.API_KEY) return import.meta.env.API_KEY;
       }
+      
+      // 2. Cek process.env (Fallback untuk setup lama/CRA)
+      // Kita harus berhati-hati mengakses process di browser modern
+      if (typeof process !== 'undefined' && process.env) {
+        return process.env.REACT_APP_API_KEY || process.env.VITE_API_KEY || process.env.API_KEY;
+      }
     } catch (e) {
-      console.warn("Error reading environment variables", e);
+      console.warn("Gagal membaca environment variables:", e);
     }
     return '';
   })();
@@ -80,8 +82,9 @@ const App: React.FC = () => {
   };
 
   const handleProcess = async () => {
+    // Double check saat runtime
     if (!API_KEY) {
-      setError("Sistem Error: API Key tidak ditemukan di konfigurasi server (Netlify).");
+      setError("Konfigurasi Error: API Key tidak ditemukan. Cek pengaturan Netlify.");
       return;
     }
     if (!selectedImage) {
@@ -97,7 +100,6 @@ const App: React.FC = () => {
     setError(null);
 
     try {
-      // Menggunakan API_KEY dari environment variable
       const result: AnalysisResult = await analyzeImageWithGemini(API_KEY, selectedImage);
       
       const newReport: ReportData = {
@@ -124,6 +126,57 @@ const App: React.FC = () => {
 
   // --- RENDER ---
 
+  // 0. VIEW: MISSING CONFIGURATION (BLOCKER)
+  // Ini akan muncul jika API Key benar-benar kosong (biasanya karena masalah prefix VITE_)
+  if (!API_KEY) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-6 font-sans">
+        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full border-l-8 border-yellow-500">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h1 className="text-xl font-bold text-slate-800">Setup Diperlukan</h1>
+          </div>
+          
+          <p className="text-slate-600 mb-4 leading-relaxed">
+            Aplikasi berhasil di-deploy, tetapi <strong>API Key</strong> tidak terbaca oleh browser.
+          </p>
+          
+          <div className="bg-slate-100 border border-slate-200 p-4 rounded-xl text-sm text-slate-700 mb-6">
+            <p className="font-bold mb-2 text-slate-900">Penyebab Umum (Netlify + Vite):</p>
+            <p className="mb-2">
+              Sistem build (Vite) secara otomatis memblokir environment variables yang tidak diawali dengan <code className="text-pink-600 font-mono">VITE_</code>.
+            </p>
+          </div>
+
+          <div className="space-y-3 mb-8">
+            <h3 className="font-bold text-sm uppercase tracking-wide text-slate-500">Solusi:</h3>
+            <ol className="list-decimal pl-5 space-y-2 text-sm text-slate-800">
+              <li>Buka Dashboard Netlify &gt; <strong>Site settings</strong>.</li>
+              <li>Masuk ke <strong>Environment variables</strong>.</li>
+              <li>
+                Edit variable <code className="bg-gray-200 px-1 rounded">API_KEY</code> Anda, dan ubah namanya (Key) menjadi:
+                <div className="mt-1 bg-slate-800 text-white p-2 rounded font-mono text-center font-bold select-all">
+                  VITE_API_KEY
+                </div>
+              </li>
+              <li>Klik <strong>Save</strong>.</li>
+              <li>Pergi ke tab <strong>Deploys</strong> &gt; <strong>Trigger deploy</strong> (Redeploy site).</li>
+            </ol>
+          </div>
+
+          <button 
+            onClick={() => window.location.reload()}
+            className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition shadow-lg shadow-teal-700/20"
+          >
+            Refresh Halaman (Setelah Redeploy)
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // 1. VIEW: REPORT RESULT
   if (reportData) {
     return <ReportView data={reportData} onReset={resetAll} />;
@@ -144,16 +197,10 @@ const App: React.FC = () => {
           <ProfileForm initialProfile={null} onSave={handleSaveProfile} />
         </div>
         
-        {/* Indikator Status Sistem (Untuk Debugging User) */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-slate-400 max-w-sm leading-relaxed mb-2">
-            Data Profil disimpan di browser Anda.
+        <div className="mt-8 text-center opacity-60">
+          <p className="text-xs text-slate-400">
+            System Ready &bull; Gemini AI Connected
           </p>
-          {!API_KEY && (
-            <span className="inline-block px-3 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded-full uppercase tracking-wider">
-              API Key Missing
-            </span>
-          )}
         </div>
       </div>
     );
