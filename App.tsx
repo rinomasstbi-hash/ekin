@@ -1,50 +1,34 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { ProfileForm } from './components/ProfileForm';
 import { ReportView } from './components/ReportView';
 import { TeacherProfile, AnalysisResult, ReportData } from './types';
 import { analyzeImageWithGemini } from './services/geminiService';
 
 const App: React.FC = () => {
-  // --- STATE MANAGEMENT ---
-  
-  // Logic to detect Environment API Key (Netlify/Vite/CRA)
-  const getEnvApiKey = () => {
+  // --- ENVIRONMENT VARIABLE HANDLING ---
+  // Mengambil API Key dari Environment Variable (Netlify/System)
+  // Tidak ada UI untuk input manual.
+  const API_KEY = (() => {
     try {
-      // Check for Vite specific env vars
+      // 1. Cek process.env (Standard Node/Netlify)
+      if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+        return process.env.API_KEY;
+      }
+      // 2. Cek import.meta.env (Vite standard)
       // @ts-ignore
       if (typeof import.meta !== 'undefined' && import.meta.env) {
-         // @ts-ignore
+        // @ts-ignore
         if (import.meta.env.VITE_API_KEY) return import.meta.env.VITE_API_KEY;
-         // @ts-ignore
+        // @ts-ignore
         if (import.meta.env.API_KEY) return import.meta.env.API_KEY;
       }
-      
-      // Check for standard process.env (Create React App / Webpack / Netlify default)
-      if (typeof process !== 'undefined' && process.env) {
-        if (process.env.REACT_APP_API_KEY) return process.env.REACT_APP_API_KEY;
-        if (process.env.VITE_API_KEY) return process.env.VITE_API_KEY;
-        if (process.env.API_KEY) return process.env.API_KEY;
-      }
     } catch (e) {
-      // Ignore errors if environment variables are not accessible
+      console.warn("Error reading environment variables", e);
     }
     return '';
-  };
+  })();
 
-  const envKey = getEnvApiKey();
-  const isKeyManaged = !!envKey;
-
-  const [apiKey, setApiKey] = useState<string>(() => {
-    // 1. Priority: Environment Variable
-    if (envKey) return envKey;
-
-    // 2. Priority: Local Storage (User entered)
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('rhk_gemini_key') || '';
-    }
-    return '';
-  });
-
+  // --- STATE MANAGEMENT ---
   const [profile, setProfile] = useState<TeacherProfile | null>(() => {
     if (typeof window !== 'undefined') {
       const savedProfile = localStorage.getItem('rhk_profile');
@@ -53,7 +37,6 @@ const App: React.FC = () => {
     return null;
   });
 
-  const [showSettings, setShowSettings] = useState<boolean>(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -73,27 +56,10 @@ const App: React.FC = () => {
     localStorage.setItem('rhk_profile', JSON.stringify(newProfile));
   };
 
-  const handleSaveKey = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem('rhk_gemini_key', key);
-    setShowSettings(false);
-  };
-
-  const handleClearData = () => {
-    if (confirm("Apakah Anda yakin ingin menghapus semua data (Profil & API Key) dari browser ini?")) {
-      localStorage.removeItem('rhk_profile');
-      localStorage.removeItem('rhk_gemini_key');
+  const handleChangeProfile = () => {
+    if (confirm("Apakah Anda ingin mengubah data profil guru?")) {
       setProfile(null);
-      
-      // Only clear API key if it's not from environment
-      if (!isKeyManaged) {
-        setApiKey('');
-      }
-      
       setReportData(null);
-      setSelectedImage(null);
-      setShowSettings(false);
-      window.location.reload();
     }
   };
 
@@ -114,8 +80,8 @@ const App: React.FC = () => {
   };
 
   const handleProcess = async () => {
-    if (!apiKey) {
-      setShowSettings(true);
+    if (!API_KEY) {
+      setError("Sistem Error: API Key tidak ditemukan di konfigurasi server (Netlify).");
       return;
     }
     if (!selectedImage) {
@@ -131,7 +97,8 @@ const App: React.FC = () => {
     setError(null);
 
     try {
-      const result: AnalysisResult = await analyzeImageWithGemini(apiKey, selectedImage);
+      // Menggunakan API_KEY dari environment variable
+      const result: AnalysisResult = await analyzeImageWithGemini(API_KEY, selectedImage);
       
       const newReport: ReportData = {
         image: selectedImage,
@@ -176,10 +143,18 @@ const App: React.FC = () => {
           </div>
           <ProfileForm initialProfile={null} onSave={handleSaveProfile} />
         </div>
-        <p className="mt-8 text-xs text-slate-400 text-center max-w-sm leading-relaxed">
-          Privasi Aman: Data Profil disimpan di browser Anda (LocalStorage). <br/>
-          {isKeyManaged ? "API Key telah dikonfigurasi oleh sistem." : "API Key disimpan di LocalStorage."}
-        </p>
+        
+        {/* Indikator Status Sistem (Untuk Debugging User) */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-slate-400 max-w-sm leading-relaxed mb-2">
+            Data Profil disimpan di browser Anda.
+          </p>
+          {!API_KEY && (
+            <span className="inline-block px-3 py-1 bg-red-100 text-red-600 text-[10px] font-bold rounded-full uppercase tracking-wider">
+              API Key Missing
+            </span>
+          )}
+        </div>
       </div>
     );
   }
@@ -196,11 +171,12 @@ const App: React.FC = () => {
             <p className="text-teal-100 text-xs mt-1 opacity-90">Halo, {profile.nama}</p>
           </div>
           <button 
-            onClick={() => setShowSettings(true)}
-            className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition backdrop-blur-sm"
-            title="Pengaturan"
+            onClick={handleChangeProfile}
+            className="px-3 py-1.5 bg-white/10 rounded-lg hover:bg-white/20 transition backdrop-blur-sm text-xs font-semibold flex items-center gap-1"
+            title="Ganti Profil Guru"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            Ganti Profil
           </button>
         </header>
 
@@ -290,98 +266,13 @@ const App: React.FC = () => {
           </button>
         </div>
 
-        {/* Privacy Note Footer */}
+        {/* Footer */}
         <div className="bg-slate-50 p-4 text-center border-t border-slate-100">
           <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">
             Privacy First &bull; Local Processing
           </p>
         </div>
       </div>
-
-      {/* Settings Modal */}
-      {showSettings && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl transform transition-all scale-100">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-slate-800">Pengaturan</h3>
-              <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-slate-600">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* API Key Section */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Google Gemini API Key</label>
-                
-                {isKeyManaged ? (
-                  <div className="w-full px-4 py-3 bg-teal-50 border border-teal-200 rounded-xl text-teal-800 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span className="text-sm font-medium">Terkonfigurasi oleh Sistem</span>
-                  </div>
-                ) : (
-                  <>
-                    <div className="relative">
-                      <input 
-                        type="password" 
-                        placeholder="Masukkan kunci AIza..." 
-                        className="w-full pl-4 pr-10 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                      />
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-2">
-                      Belum punya? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-teal-600 font-semibold hover:underline">Dapatkan API Key Gratis</a>
-                    </p>
-                    {!apiKey && (
-                      <div className="mt-2 bg-yellow-50 text-yellow-700 text-xs p-2 rounded border border-yellow-200">
-                        API Key diperlukan agar AI dapat menganalisis foto.
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-
-              <div className="border-t border-slate-100 pt-4">
-                {!isKeyManaged && (
-                  <button 
-                    onClick={() => handleSaveKey(apiKey)}
-                    className="w-full py-3 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-700 transition shadow-lg shadow-teal-900/10 mb-3"
-                  >
-                    Simpan Pengaturan
-                  </button>
-                )}
-                
-                <button 
-                  onClick={() => { setProfile(null); setShowSettings(false); }}
-                  className="w-full py-3 text-teal-700 font-semibold hover:bg-teal-50 rounded-xl transition border border-transparent hover:border-teal-100"
-                >
-                  Edit Profil Guru
-                </button>
-              </div>
-
-              {/* Danger Zone */}
-              <div className="border-t border-red-100 pt-4 mt-2">
-                <h4 className="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">Zona Bahaya</h4>
-                <button 
-                  onClick={handleClearData}
-                  className="w-full py-2 text-red-600 text-sm font-semibold hover:bg-red-50 rounded-lg transition text-left px-4 flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                  Hapus Semua Data & Reset
-                </button>
-              </div>
-            </div>
-            
-            <div className="mt-6 text-[10px] text-slate-400 text-center leading-tight">
-              Aplikasi ini bersifat open-source. API Key Anda disimpan terenkripsi di penyimpanan lokal browser (LocalStorage) dan tidak pernah dikirim ke server selain Google AI.
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
