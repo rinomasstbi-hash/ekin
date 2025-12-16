@@ -10,7 +10,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
   const { profile, analysis, image, periode, tanggalLaporan } = data;
 
   return (
-    // Changed: Added print:block, print:p-0, print:bg-white to wrapper
+    // Wrapper print settings
     <div className="flex flex-col items-center w-full bg-gray-100 min-h-screen p-4 sm:p-8 print:p-0 print:bg-white print:block">
       
       {/* Floating Action Bar (Hidden when printing) */}
@@ -32,11 +32,8 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
         </button>
       </div>
 
-      {/* PAPER 1: COVER */}
-      {/* Added 'sheet' class for strict print styling */}
+      {/* --- HALAMAN 1: COVER --- */}
       <div className="sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] mb-8 print:mb-0 relative mx-auto flex flex-col justify-between">
-        
-        {/* Border container inside cover */}
         <div className="flex-1 flex flex-col items-center justify-between text-center border-4 border-double border-gray-800 p-8">
           
           <div className="mt-10">
@@ -69,9 +66,8 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
         </div>
       </div>
 
-      {/* PAPER 2: CONTENT */}
-      {/* Added 'sheet' class and overflow handling */}
-      <div className="sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] relative mx-auto print:mt-0 flex flex-col">
+      {/* --- HALAMAN 2: ISI LAPORAN (TEKS) --- */}
+      <div className="sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] relative mx-auto print:mt-0 mb-8 print:mb-0 flex flex-col">
         <div className="font-serif text-justify leading-relaxed text-gray-900 h-full flex flex-col">
           
           {/* Header Internal */}
@@ -80,57 +76,74 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
             <p className="text-sm text-gray-600">{analysis.jenis_kegiatan}</p>
           </div>
 
-          {/* Content Body - Allows slight flexibility but keeps structure */}
-          <div className="flex-1 flex flex-col gap-5">
+          {/* Content Body */}
+          <div className="flex-1 flex flex-col gap-8">
             {/* Section A */}
             <div>
-              <h3 className="font-bold text-lg mb-1">A. Latar Belakang</h3>
-              <p className="text-sm sm:text-base">{analysis.latar_belakang}</p>
+              <h3 className="font-bold text-lg mb-2 border-b border-gray-200 pb-1">A. Latar Belakang</h3>
+              <p className="text-base">{analysis.latar_belakang}</p>
             </div>
 
             {/* Section B */}
             <div>
-              <h3 className="font-bold text-lg mb-1">B. Deskripsi Kegiatan</h3>
-              <p className="text-sm sm:text-base">{analysis.deskripsi}</p>
+              <h3 className="font-bold text-lg mb-2 border-b border-gray-200 pb-1">B. Deskripsi Kegiatan</h3>
+              <p className="text-base">{analysis.deskripsi}</p>
             </div>
 
             {/* Section C */}
             <div>
-              <h3 className="font-bold text-lg mb-1">C. Nilai Karakter (Dimensi Profil Lulusan)</h3>
-              <ul className="list-disc pl-5 text-sm sm:text-base">
+              <h3 className="font-bold text-lg mb-2 border-b border-gray-200 pb-1">C. Nilai Karakter (Dimensi Profil Lulusan)</h3>
+              <ul className="list-disc pl-5 text-base space-y-1">
                 {analysis.nilai_karakter.map((nilai, index) => (
                   <li key={index}>{nilai}</li>
                 ))}
               </ul>
             </div>
+          </div>
+          
+          {/* Footer Note */}
+          <div className="mt-auto text-right text-xs italic text-gray-400">
+            (Dokumentasi dan Pengesahan di halaman berikutnya)
+          </div>
+        </div>
+      </div>
 
-            {/* Section D: Dokumentasi */}
-            {/* Limit image height strictly for print */}
-            <div className="break-inside-avoid text-center">
-              <h3 className="font-bold text-lg mb-2 text-left">D. Dokumentasi</h3>
-              <div className="border border-gray-300 p-2 rounded bg-gray-50 inline-block max-w-full">
-                <img 
-                  src={image} 
-                  alt="Bukti Kegiatan" 
-                  className="w-auto h-auto max-h-[250px] print:max-h-[200px] object-contain mx-auto rounded" 
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1 italic">Bukti foto kegiatan pelaksanaan kinerja.</p>
-            </div>
+      {/* --- HALAMAN 3: DOKUMENTASI & PENGESAHAN --- */}
+      <div className="sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] relative mx-auto print:mt-0 flex flex-col justify-between">
+        <div className="font-serif w-full h-full flex flex-col">
+          
+          {/* Header Internal (Optional, kept small for context) */}
+          <div className="border-b border-gray-300 pb-2 mb-6 text-right shrink-0">
+            <p className="text-xs text-gray-400 italic">Lampiran Laporan: {analysis.judul_terpilih}</p>
           </div>
 
-          {/* Footer / Signature - Push to bottom */}
-          <div className="mt-8 flex justify-end shrink-0">
+          {/* Section D: Dokumentasi */}
+          <div className="flex-1 flex flex-col">
+            <h3 className="font-bold text-lg mb-4 border-b border-gray-200 pb-1">D. Dokumentasi Kegiatan</h3>
+            
+            <div className="flex-1 border border-gray-300 bg-gray-50 rounded-lg p-4 flex items-center justify-center overflow-hidden max-h-[140mm]">
+              <img 
+                src={image} 
+                alt="Bukti Kegiatan" 
+                className="w-full h-full object-contain" 
+              />
+            </div>
+            <p className="text-center text-sm text-gray-500 mt-2 italic">Gambar 1.1: Bukti fisik pelaksanaan kegiatan</p>
+          </div>
+
+          {/* Footer / Signature */}
+          <div className="mt-12 flex justify-end shrink-0">
             <div className="text-center w-64">
               <p>{profile.kota}, {tanggalLaporan}</p>
-              <p className="mt-1 mb-20 print:mb-16">Guru Penyusun,</p>
-              <p className="font-bold underline">{profile.nama}</p>
-              <p>NIP. {profile.nip || "-"}</p>
+              <p className="mt-1 mb-24 print:mb-24">Guru Penyusun,</p>
+              <p className="font-bold underline text-lg">{profile.nama}</p>
+              <p className="text-md">NIP. {profile.nip || "-"}</p>
             </div>
           </div>
 
         </div>
       </div>
+
     </div>
   );
 };
