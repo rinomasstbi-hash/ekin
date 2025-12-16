@@ -6,7 +6,39 @@ import { analyzeImageWithGemini } from './services/geminiService';
 
 const App: React.FC = () => {
   // --- STATE MANAGEMENT ---
+  
+  // Logic to detect Environment API Key (Netlify/Vite/CRA)
+  const getEnvApiKey = () => {
+    try {
+      // Check for Vite specific env vars
+      // @ts-ignore
+      if (typeof import.meta !== 'undefined' && import.meta.env) {
+         // @ts-ignore
+        if (import.meta.env.VITE_API_KEY) return import.meta.env.VITE_API_KEY;
+         // @ts-ignore
+        if (import.meta.env.API_KEY) return import.meta.env.API_KEY;
+      }
+      
+      // Check for standard process.env (Create React App / Webpack / Netlify default)
+      if (typeof process !== 'undefined' && process.env) {
+        if (process.env.REACT_APP_API_KEY) return process.env.REACT_APP_API_KEY;
+        if (process.env.VITE_API_KEY) return process.env.VITE_API_KEY;
+        if (process.env.API_KEY) return process.env.API_KEY;
+      }
+    } catch (e) {
+      // Ignore errors if environment variables are not accessible
+    }
+    return '';
+  };
+
+  const envKey = getEnvApiKey();
+  const isKeyManaged = !!envKey;
+
   const [apiKey, setApiKey] = useState<string>(() => {
+    // 1. Priority: Environment Variable
+    if (envKey) return envKey;
+
+    // 2. Priority: Local Storage (User entered)
     if (typeof window !== 'undefined') {
       return localStorage.getItem('rhk_gemini_key') || '';
     }
@@ -52,7 +84,12 @@ const App: React.FC = () => {
       localStorage.removeItem('rhk_profile');
       localStorage.removeItem('rhk_gemini_key');
       setProfile(null);
-      setApiKey('');
+      
+      // Only clear API key if it's not from environment
+      if (!isKeyManaged) {
+        setApiKey('');
+      }
+      
       setReportData(null);
       setSelectedImage(null);
       setShowSettings(false);
@@ -140,7 +177,8 @@ const App: React.FC = () => {
           <ProfileForm initialProfile={null} onSave={handleSaveProfile} />
         </div>
         <p className="mt-8 text-xs text-slate-400 text-center max-w-sm leading-relaxed">
-          Privasi Aman: Semua data (Profil & API Key) hanya disimpan di dalam browser Anda (LocalStorage) dan tidak dikirim ke server kami.
+          Privasi Aman: Data Profil disimpan di browser Anda (LocalStorage). <br/>
+          {isKeyManaged ? "API Key telah dikonfigurasi oleh sistem." : "API Key disimpan di LocalStorage."}
         </p>
       </div>
     );
@@ -275,35 +313,47 @@ const App: React.FC = () => {
               {/* API Key Section */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">Google Gemini API Key</label>
-                <div className="relative">
-                  <input 
-                    type="password" 
-                    placeholder="Masukkan kunci AIza..." 
-                    className="w-full pl-4 pr-10 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                  />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                
+                {isKeyManaged ? (
+                  <div className="w-full px-4 py-3 bg-teal-50 border border-teal-200 rounded-xl text-teal-800 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span className="text-sm font-medium">Terkonfigurasi oleh Sistem</span>
                   </div>
-                </div>
-                <p className="text-xs text-slate-500 mt-2">
-                  Belum punya? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-teal-600 font-semibold hover:underline">Dapatkan API Key Gratis</a>
-                </p>
-                {!apiKey && (
-                  <div className="mt-2 bg-yellow-50 text-yellow-700 text-xs p-2 rounded border border-yellow-200">
-                    API Key diperlukan agar AI dapat menganalisis foto.
-                  </div>
+                ) : (
+                  <>
+                    <div className="relative">
+                      <input 
+                        type="password" 
+                        placeholder="Masukkan kunci AIza..." 
+                        className="w-full pl-4 pr-10 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                      />
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-2">
+                      Belum punya? <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-teal-600 font-semibold hover:underline">Dapatkan API Key Gratis</a>
+                    </p>
+                    {!apiKey && (
+                      <div className="mt-2 bg-yellow-50 text-yellow-700 text-xs p-2 rounded border border-yellow-200">
+                        API Key diperlukan agar AI dapat menganalisis foto.
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
               <div className="border-t border-slate-100 pt-4">
-                <button 
-                  onClick={() => handleSaveKey(apiKey)}
-                  className="w-full py-3 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-700 transition shadow-lg shadow-teal-900/10 mb-3"
-                >
-                  Simpan Pengaturan
-                </button>
+                {!isKeyManaged && (
+                  <button 
+                    onClick={() => handleSaveKey(apiKey)}
+                    className="w-full py-3 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-700 transition shadow-lg shadow-teal-900/10 mb-3"
+                  >
+                    Simpan Pengaturan
+                  </button>
+                )}
                 
                 <button 
                   onClick={() => { setProfile(null); setShowSettings(false); }}
