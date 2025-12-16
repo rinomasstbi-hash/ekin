@@ -7,7 +7,53 @@ interface Props {
 }
 
 export const ReportView: React.FC<Props> = ({ data, onReset }) => {
-  const { profile, analysis, image, periode, tanggalLaporan } = data;
+  const { profile, analysis, image, periode, tanggalLaporan, categoryLabel, categoryId } = data;
+
+  // Function to render content dynamically based on sections
+  const renderDynamicContent = () => {
+    return (
+      <div className="flex-1 flex flex-col gap-6">
+        {analysis.sections.map((section, index) => (
+          <div key={index} className="break-inside-avoid-page">
+            {/* Styling title differently based on category for visual flair */}
+            <h3 className={`font-bold text-lg mb-2 pb-1 
+              ${categoryId === 'DIGITAL' ? 'text-blue-900 border-b border-blue-200' : 
+                categoryId === 'CHILD_FRIENDLY' ? 'text-teal-800' :
+                categoryId === 'RELIGIOUS_MODERATION' ? 'uppercase text-green-800 tracking-wide border-b-2 border-green-600 inline-block' :
+                'text-gray-900 border-b border-gray-300'
+              }`}
+            >
+              {['A', 'B', 'C', 'D'][index] || '*'}. {section.title}
+            </h3>
+
+            {section.type === 'paragraph' ? (
+              // Render Paragraph
+              <p className="text-base text-justify leading-relaxed text-slate-800">
+                {section.content[0]}
+              </p>
+            ) : (
+              // Render List
+              <div className={`${
+                categoryId === 'DIGITAL' ? 'bg-blue-50 p-4 rounded-lg border border-blue-100' :
+                categoryId === 'CHILD_FRIENDLY' ? 'bg-white border-l-4 border-teal-400 pl-4 py-2' :
+                categoryId === 'RELIGIOUS_MODERATION' ? 'border-2 border-green-100 p-4 bg-green-50/30' :
+                ''
+              }`}>
+                <ul className={`text-base space-y-1 ${categoryId === 'RELIGIOUS_MODERATION' ? '' : 'list-disc pl-5'}`}>
+                  {section.content.map((item, idx) => (
+                    <li key={idx} className={`${categoryId === 'RELIGIOUS_MODERATION' ? 'flex items-start gap-2' : ''}`}>
+                       {categoryId === 'RELIGIOUS_MODERATION' && <span className="text-green-600 font-bold">❖</span>}
+                       <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     // Wrapper print settings
@@ -37,8 +83,8 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
         <div className="flex-1 flex flex-col items-center justify-between text-center border-4 border-double border-gray-800 p-8">
           
           <div className="mt-10">
-            <h1 className="text-2xl font-serif font-bold tracking-widest uppercase mb-4 leading-relaxed px-4">
-              Pembiasaan Pendidikan Karakter<br />Dalam Pembelajaran
+            <h1 className="text-2xl font-serif font-bold tracking-widest uppercase mb-4 leading-relaxed px-4 whitespace-pre-line">
+              {categoryLabel || "Laporan Kinerja Guru"}
             </h1>
             <h2 className="text-xl font-serif font-bold uppercase text-gray-700 px-4 mt-6">{analysis.judul_terpilih}</h2>
           </div>
@@ -66,7 +112,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
         </div>
       </div>
 
-      {/* --- HALAMAN 2: ISI LAPORAN (TEKS) --- */}
+      {/* --- HALAMAN 2: ISI LAPORAN (DYNAMIC) --- */}
       <div className="sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] relative mx-auto print:mt-0 mb-8 print:mb-0 flex flex-col">
         <div className="font-serif text-justify leading-relaxed text-gray-900 h-full flex flex-col">
           
@@ -76,30 +122,8 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
             <p className="text-sm text-gray-600">{analysis.jenis_kegiatan}</p>
           </div>
 
-          {/* Content Body */}
-          <div className="flex-1 flex flex-col gap-8">
-            {/* Section A */}
-            <div>
-              <h3 className="font-bold text-lg mb-2 border-b border-gray-200 pb-1">A. Latar Belakang</h3>
-              <p className="text-base">{analysis.latar_belakang}</p>
-            </div>
-
-            {/* Section B */}
-            <div>
-              <h3 className="font-bold text-lg mb-2 border-b border-gray-200 pb-1">B. Deskripsi Kegiatan</h3>
-              <p className="text-base">{analysis.deskripsi}</p>
-            </div>
-
-            {/* Section C */}
-            <div>
-              <h3 className="font-bold text-lg mb-2 border-b border-gray-200 pb-1">C. Nilai Karakter (Dimensi Profil Lulusan)</h3>
-              <ul className="list-disc pl-5 text-base space-y-1">
-                {analysis.nilai_karakter.map((nilai, index) => (
-                  <li key={index}>{nilai}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          {/* Body Content */}
+          {renderDynamicContent()}
           
           {/* Footer Note */}
           <div className="mt-auto text-right text-xs italic text-gray-400">
@@ -112,12 +136,12 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
       <div className="sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] relative mx-auto print:mt-0 flex flex-col justify-between">
         <div className="font-serif w-full h-full flex flex-col">
           
-          {/* Header Internal (Optional, kept small for context) */}
+          {/* Header Internal */}
           <div className="border-b border-gray-300 pb-2 mb-6 text-right shrink-0">
-            <p className="text-xs text-gray-400 italic">Lampiran Laporan: {analysis.judul_terpilih}</p>
+            <p className="text-xs text-gray-400 italic">Lampiran: {analysis.judul_terpilih}</p>
           </div>
 
-          {/* Section D: Dokumentasi */}
+          {/* Section: Dokumentasi */}
           <div className="flex-1 flex flex-col">
             <h3 className="font-bold text-lg mb-4 border-b border-gray-200 pb-1">D. Dokumentasi Kegiatan</h3>
             
