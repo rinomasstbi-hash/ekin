@@ -1,0 +1,5 @@
+{
+  "name": "Smart RHK Generator",
+  "description": "Aplikasi AI untuk menghasilkan laporan kinerja guru otomatis dari foto kegiatan.",
+  "requestFramePermissions": []
+}
