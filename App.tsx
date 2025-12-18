@@ -99,9 +99,10 @@ const App: React.FC = () => {
         profile: profile,
         periode: periode,
         analysis: result,
-        tanggalLaporan: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        // Update format: Only Month and Year
+        tanggalLaporan: new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }),
         categoryLabel: categoryConfig ? categoryConfig.coverTitle : 'Laporan Kinerja',
-        categoryId: selectedCategoryId // Pass the ID for specific rendering
+        categoryId: selectedCategoryId
       };
       
       setReportData(newReport);

@@ -155,11 +155,21 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
             <p className="text-center text-sm text-gray-500 mt-2 italic">Gambar 1.1: Bukti fisik pelaksanaan kegiatan</p>
           </div>
 
-          {/* Footer / Signature */}
+          {/* Footer / Signature with Image */}
           <div className="mt-12 flex justify-end shrink-0">
             <div className="text-center w-64">
               <p>{profile.kota}, {tanggalLaporan}</p>
-              <p className="mt-1 mb-24 print:mb-24">Guru Penyusun,</p>
+              <p className="mt-1 mb-2">Guru Penyusun,</p>
+              
+              {/* Added Signature Image from Google Drive */}
+              <div className="h-20 flex items-center justify-center my-2">
+                <img 
+                  src="https://drive.google.com/thumbnail?id=1gdxnC3M_VZLA--WQ5eEB66EJAO7dYm3o&sz=w500" 
+                  alt="Tanda Tangan" 
+                  className="h-full object-contain mix-blend-multiply" 
+                />
+              </div>
+
               <p className="font-bold underline text-lg">{profile.nama}</p>
               <p className="text-md">NIP. {profile.nip || "-"}</p>
             </div>
