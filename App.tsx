@@ -6,7 +6,6 @@ import { RHK_CATEGORIES } from './constants';
 import { analyzeImageWithGemini } from './services/geminiService';
 
 const App: React.FC = () => {
-  // --- ENVIRONMENT VARIABLE HANDLING ---
   const API_KEY = (() => {
     try {
       // @ts-ignore
@@ -25,7 +24,6 @@ const App: React.FC = () => {
     return '';
   })();
 
-  // --- STATE MANAGEMENT ---
   const [profile, setProfile] = useState<TeacherProfile | null>(() => {
     if (typeof window !== 'undefined') {
       const savedProfile = localStorage.getItem('rhk_profile');
@@ -39,15 +37,16 @@ const App: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [periode, setPeriode] = useState<string>(() => {
-    const date = new Date();
-    const semester = date.getMonth() < 6 ? 'Januari - Juni' : 'Juli - Desember';
-    return `${semester} ${date.getFullYear()}`;
-  });
+  const [selectedQuarter, setSelectedQuarter] = useState<number>(1);
+  
+  const quarters = [
+    { id: 1, label: 'Triwulan I', range: 'Januari - Maret' },
+    { id: 2, label: 'Triwulan II', range: 'April - Juni' },
+    { id: 3, label: 'Triwulan III', range: 'Juli - September' },
+    { id: 4, label: 'Triwulan IV', range: 'Oktober - Desember' }
+  ];
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // --- HANDLERS ---
 
   const handleSaveProfile = (newProfile: TeacherProfile) => {
     setProfile(newProfile);
@@ -91,16 +90,25 @@ const App: React.FC = () => {
 
     try {
       const result: AnalysisResult = await analyzeImageWithGemini(API_KEY, selectedImage, selectedCategoryId);
-      
       const categoryConfig = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
       
+      const q = quarters.find(item => item.id === selectedQuarter);
+      const year = new Date().getFullYear();
+      
+      // Map quarter to the last month of that quarter for the signature date
+      const monthMap: Record<number, string> = {
+        1: 'Maret',
+        2: 'Juni',
+        3: 'September',
+        4: 'Desember'
+      };
+
       const newReport: ReportData = {
         image: selectedImage,
         profile: profile,
-        periode: periode,
+        periode: `${q?.label} (${q?.range}) ${year}`,
         analysis: result,
-        // Update format: Only Month and Year
-        tanggalLaporan: new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }),
+        tanggalLaporan: `${monthMap[selectedQuarter]} ${year}`,
         categoryLabel: categoryConfig ? categoryConfig.coverTitle : 'Laporan Kinerja',
         categoryId: selectedCategoryId
       };
@@ -125,9 +133,6 @@ const App: React.FC = () => {
     setError(null);
   };
 
-  // --- RENDER FLOW ---
-
-  // 0. CHECK API KEY
   if (!API_KEY) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
@@ -140,12 +145,10 @@ const App: React.FC = () => {
     );
   }
 
-  // 1. SHOW REPORT (FINAL STATE)
   if (reportData) {
     return <ReportView data={reportData} onReset={resetAll} />;
   }
 
-  // 2. SHOW PROFILE FORM (INITIAL SETUP)
   if (!profile) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
@@ -154,7 +157,6 @@ const App: React.FC = () => {
     );
   }
 
-  // 3. SHOW CATEGORY SELECTION (MENU)
   if (!selectedCategoryId) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
@@ -191,14 +193,12 @@ const App: React.FC = () => {
     );
   }
 
-  // 4. SHOW UPLOAD SCREEN (PROCESS)
   const currentCategory = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden relative">
         
-        {/* Header */}
         <header className="bg-teal-700 p-6 text-white">
           <button 
             onClick={handleBackToMenu}
@@ -220,17 +220,25 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Content */}
         <div className="p-6 flex flex-col gap-6">
-          
-          <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
-            <label className="text-xs text-slate-500 font-bold uppercase tracking-wider block mb-1">Periode Laporan</label>
-            <input 
-              type="text" 
-              value={periode}
-              onChange={(e) => setPeriode(e.target.value)}
-              className="w-full bg-transparent text-slate-800 font-semibold border-b border-slate-300 focus:border-teal-500 outline-none pb-1 transition-colors"
-            />
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Pilih Periode Triwulan</label>
+            <div className="grid grid-cols-2 gap-2">
+              {quarters.map((q) => (
+                <button
+                  key={q.id}
+                  onClick={() => setSelectedQuarter(q.id)}
+                  className={`p-3 rounded-xl border-2 text-left transition-all ${
+                    selectedQuarter === q.id 
+                    ? 'border-teal-600 bg-teal-50 text-teal-800' 
+                    : 'border-slate-100 hover:border-teal-200 text-slate-600'
+                  }`}
+                >
+                  <div className="text-sm font-bold">{q.label}</div>
+                  <div className="text-[10px] opacity-70">{q.range}</div>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div 
