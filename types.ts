@@ -31,6 +31,15 @@ export interface ReportData {
   coverBorderIndex: number; // Added for random border variation
 }
 
+export interface ThemeConfig {
+  primary: string; // Main dark color (e.g., text-blue-800)
+  secondary: string; // Lighter color for accents (e.g., bg-blue-100)
+  accent: string; // Bright accent (e.g., text-blue-600)
+  bgGradient: string; // Gradient class for card background
+  headerColor: string; // Class for header background (e.g. bg-blue-700)
+  patternPath: string; // SVG Path for the background decoration
+}
+
 export interface RHKCategory {
   id: CategoryId;
   title: string;
@@ -38,4 +47,5 @@ export interface RHKCategory {
   icon: string;
   coverTitle: string; 
   rhkList: string[];
+  theme: ThemeConfig;
 }

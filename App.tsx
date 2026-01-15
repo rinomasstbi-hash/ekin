@@ -157,12 +157,7 @@ const App: React.FC = () => {
   };
 
   // Logic: Show setup screen ONLY if neither Env Key nor Custom Key is present AND user hasn't tried to input one yet.
-  // However, we want to allow user to input key inside the main UI if Env key is missing too.
-  // For now, if no Env Key, we just let the main UI render but it will error out or we can show the error box immediately.
-  // Let's keep the blocking UI only if absolutely nothing is configured, but since we added input in error box, we can be more lenient.
-  
   if (!EFFECTIVE_API_KEY && !error && !ENV_API_KEY) {
-    // Initial State: No Env Key found, prompting user before entering app
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
         <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-yellow-500 max-w-md w-full">
@@ -179,7 +174,7 @@ const App: React.FC = () => {
            </p>
            <button 
             disabled={!customApiKey}
-            onClick={() => {}} // Just rerenders due to state change
+            onClick={() => {}} 
             className="w-full bg-teal-600 text-white px-4 py-2 rounded disabled:opacity-50 hover:bg-teal-700 transition"
            >
              Mulai Aplikasi
@@ -215,20 +210,36 @@ const App: React.FC = () => {
               </button>
            </header>
 
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {RHK_CATEGORIES.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategoryId(cat.id)}
-                  className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl hover:scale-[1.02] border border-transparent hover:border-teal-500 transition-all text-left group"
+                  className={`
+                    relative overflow-hidden p-6 rounded-2xl shadow-sm hover:shadow-xl hover:scale-[1.02] border transition-all text-left group
+                    ${cat.theme.bgGradient} border-slate-100 hover:border-transparent
+                  `}
                 >
-                  <div className="w-12 h-12 bg-teal-100 text-teal-700 rounded-xl flex items-center justify-center mb-4 group-hover:bg-teal-600 group-hover:text-white transition-colors">
+                  {/* Background Shape Pattern */}
+                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 opacity-10 pointer-events-none transform rotate-12 group-hover:scale-110 group-hover:opacity-20 transition-all duration-500">
+                     <svg viewBox="0 0 24 24" fill="currentColor" className={cat.theme.primary}>
+                        <path d={cat.theme.patternPath} />
+                     </svg>
+                  </div>
+
+                  <div className={`
+                    w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors z-10 relative
+                    ${cat.theme.secondary} ${cat.theme.primary} group-hover:bg-white
+                  `}>
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={cat.icon} />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-1">{cat.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{cat.description}</p>
+                  
+                  <div className="relative z-10">
+                    <h3 className={`text-lg font-bold mb-1 ${cat.theme.primary}`}>{cat.title}</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed opacity-90">{cat.description}</p>
+                  </div>
                 </button>
               ))}
            </div>
@@ -238,28 +249,37 @@ const App: React.FC = () => {
   }
 
   const currentCategory = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
+  // Default fallback if not found
+  const headerColor = currentCategory?.theme.headerColor || 'bg-teal-700';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden relative">
         
-        <header className="bg-teal-700 p-6 text-white">
+        <header className={`${headerColor} p-6 text-white transition-colors duration-300 relative overflow-hidden`}>
+          {/* Decorative Pattern in Header */}
+          <div className="absolute -right-6 -top-6 w-32 h-32 opacity-20 pointer-events-none">
+             <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d={currentCategory?.theme.patternPath || ''} />
+             </svg>
+          </div>
+
           <button 
             onClick={handleBackToMenu}
-            className="flex items-center gap-1 text-teal-100 text-sm mb-4 hover:text-white transition"
+            className="flex items-center gap-1 text-white/80 text-sm mb-4 hover:text-white transition relative z-10"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
             Kembali ke Menu
           </button>
-          <div className="flex items-start gap-4">
-             <div className="p-3 bg-white/10 rounded-xl">
+          <div className="flex items-start gap-4 relative z-10">
+             <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={currentCategory?.icon || ''} />
                </svg>
              </div>
              <div>
                <h1 className="text-xl font-bold">{currentCategory?.title}</h1>
-               <p className="text-teal-100 text-xs mt-1 opacity-90">{profile.nama}</p>
+               <p className="text-white/80 text-xs mt-1">{profile.nama}</p>
              </div>
           </div>
         </header>
@@ -274,9 +294,10 @@ const App: React.FC = () => {
                   onClick={() => setSelectedQuarter(q.id)}
                   className={`p-3 rounded-xl border-2 text-left transition-all ${
                     selectedQuarter === q.id 
-                    ? 'border-teal-600 bg-teal-50 text-teal-800' 
-                    : 'border-slate-100 hover:border-teal-200 text-slate-600'
+                    ? `border-${currentCategory?.theme.primary.split('-')[1] || 'teal'}-600 bg-white text-${currentCategory?.theme.primary.split('-')[1] || 'teal'}-800 shadow-sm`
+                    : 'border-slate-100 hover:border-slate-300 text-slate-600'
                   }`}
+                  style={selectedQuarter === q.id ? { borderColor: 'currentColor' } : {}}
                 >
                   <div className="text-sm font-bold">{q.label}</div>
                   <div className="text-[10px] opacity-70">{q.range}</div>
@@ -289,8 +310,9 @@ const App: React.FC = () => {
             onClick={() => !isAnalyzing && fileInputRef.current?.click()}
             className={`
               relative group cursor-pointer rounded-3xl border-2 border-dashed transition-all duration-300 overflow-hidden aspect-video flex flex-col items-center justify-center text-center p-6
-              ${selectedImage ? 'border-teal-400 bg-teal-50' : 'border-slate-300 hover:border-teal-400 hover:bg-slate-50'}
+              ${selectedImage ? 'border-transparent bg-slate-50' : 'border-slate-300 hover:border-current hover:bg-slate-50'}
               ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}
+              ${currentCategory?.theme.accent || 'text-teal-600'}
             `}
           >
             {selectedImage ? (
@@ -302,7 +324,7 @@ const App: React.FC = () => {
               </>
             ) : (
               <>
-                <div className="bg-teal-100 text-teal-600 p-4 rounded-full mb-3 group-hover:scale-110 transition-transform">
+                <div className={`p-4 rounded-full mb-3 group-hover:scale-110 transition-transform ${currentCategory?.theme.secondary || 'bg-teal-50'}`}>
                   <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </div>
                 <h3 className="font-bold text-slate-700 text-lg">Upload Foto</h3>
@@ -319,7 +341,6 @@ const App: React.FC = () => {
             />
           </div>
 
-          {/* New Input Field for User Note */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
               Keterangan / Judul Spesifik (Opsional)
@@ -329,7 +350,8 @@ const App: React.FC = () => {
               value={userNote}
               onChange={(e) => setUserNote(e.target.value)}
               placeholder="Contoh: Upacara Bendera, Rapat Dinas, Praktik IPA..."
-              className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-teal-500 focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50 placeholder-slate-400"
+              className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-current focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50 placeholder-slate-400"
+              style={{ color: 'inherit' }}
               disabled={isAnalyzing}
             />
             <p className="text-xs text-slate-400">
@@ -344,7 +366,6 @@ const App: React.FC = () => {
                 <span>{error}</span>
               </div>
               
-              {/* Fallback Input for API Key */}
               <div className="bg-white/60 p-3 rounded-lg border border-red-200 mt-1">
                 <label className="block text-xs font-bold text-red-800 mb-1 uppercase tracking-wider">
                   Gunakan API Key Pribadi (Sementara)
@@ -369,10 +390,10 @@ const App: React.FC = () => {
             onClick={handleProcess}
             disabled={!selectedImage || isAnalyzing}
             className={`
-              w-full py-4 rounded-xl font-bold text-lg shadow-lg shadow-teal-900/10 flex items-center justify-center gap-3 transition-all transform active:scale-[0.98]
+              w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-3 transition-all transform active:scale-[0.98]
               ${!selectedImage || isAnalyzing 
                 ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' 
-                : 'bg-teal-600 text-white hover:bg-teal-700'
+                : `${headerColor} text-white hover:brightness-110 shadow-teal-900/10`
               }
             `}
           >
