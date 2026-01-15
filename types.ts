@@ -14,6 +14,7 @@ export interface ReportSection {
 export interface AnalysisResult {
   judul_terpilih: string;
   jenis_kegiatan: 'Intrakurikuler' | 'Kokurikuler' | 'Ekstrakurikuler';
+  caption: string; // Deskripsi gambar (dari user input atau AI generated)
   sections: ReportSection[];
 }
 

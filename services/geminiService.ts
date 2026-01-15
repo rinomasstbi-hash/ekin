@@ -56,7 +56,7 @@ export const analyzeImageWithGemini = async (
 
   const prompt = `
     Saya mengirimkan foto kegiatan guru. Konteks: ${selectedCategory.title}.
-    ${userNote ? `\nCATATAN KHUSUS PENGGUNA (Gunakan ini sebagai acuan utama judul/deskripsi): ${userNote}` : ''}
+    ${userNote ? `\nCATATAN KHUSUS PENGGUNA: "${userNote}"` : ''}
     
     Tugas:
     1. Identifikasi visual foto.
@@ -64,7 +64,10 @@ export const analyzeImageWithGemini = async (
     ${rhkListString}
     (Jika catatan pengguna lebih spesifik, boleh sesuaikan judul sedikit agar relevan, tapi tetap mengacu pada daftar RHK).
     3. Tentukan jenis kegiatan (Intrakurikuler/Kokurikuler/Ekstrakurikuler).
-    4. ${structureInstruction}
+    4. Isi field 'caption':
+       - JIKA ada CATATAN KHUSUS PENGGUNA: Gunakan catatan tersebut sebagai caption.
+       - JIKA TIDAK ADA catatan: Buatlah deskripsi singkat (maksimal 1 kalimat, formal) tentang apa yang terlihat di gambar (Contoh: "Guru sedang memberikan penjelasan materi di depan kelas").
+    5. ${structureInstruction}
     
     Gunakan Bahasa Indonesia formal untuk laporan resmi dinas.
   `;
@@ -85,6 +88,7 @@ export const analyzeImageWithGemini = async (
           properties: {
             judul_terpilih: { type: Type.STRING },
             jenis_kegiatan: { type: Type.STRING, enum: ["Intrakurikuler", "Kokurikuler", "Ekstrakurikuler"] },
+            caption: { type: Type.STRING },
             sections: {
               type: Type.ARRAY,
               items: {
@@ -98,7 +102,7 @@ export const analyzeImageWithGemini = async (
               }
             }
           },
-          required: ["judul_terpilih", "jenis_kegiatan", "sections"]
+          required: ["judul_terpilih", "jenis_kegiatan", "caption", "sections"]
         }
       }
     });

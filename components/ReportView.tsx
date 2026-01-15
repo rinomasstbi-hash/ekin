@@ -185,7 +185,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                 className="w-full h-full object-contain" 
               />
             </div>
-            <p className="text-center text-sm text-gray-500 mt-2 italic">Gambar 1.1: Bukti fisik pelaksanaan kegiatan</p>
+            <p className="text-center text-sm text-gray-500 mt-2 italic">Gambar 1.1: {analysis.caption}</p>
           </div>
 
           {/* Footer / Signature with Image */}
