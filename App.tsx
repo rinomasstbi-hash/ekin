@@ -107,13 +107,17 @@ const App: React.FC = () => {
       
       const q = quarters.find(item => item.id === selectedQuarter);
       
-      // Map quarter to the last month of that quarter for the signature date
-      const monthMap: Record<number, string> = {
-        1: 'Maret',
-        2: 'Juni',
-        3: 'September',
-        4: 'Desember'
+      // Map quarter to the list of months in that quarter
+      const quarterMonthsMap: Record<number, string[]> = {
+        1: ['Januari', 'Februari', 'Maret'],
+        2: ['April', 'Mei', 'Juni'],
+        3: ['Juli', 'Agustus', 'September'],
+        4: ['Oktober', 'November', 'Desember']
       };
+
+      // Get possible months for the selected quarter and pick one randomly
+      const possibleMonths = quarterMonthsMap[selectedQuarter];
+      const randomMonth = possibleMonths[Math.floor(Math.random() * possibleMonths.length)];
 
       // Generate random border index (0 to 4)
       const randomBorderIndex = Math.floor(Math.random() * 5);
@@ -123,7 +127,7 @@ const App: React.FC = () => {
         profile: profile,
         periode: `${q?.label} (${q?.range})`, 
         analysis: result,
-        tanggalLaporan: `${monthMap[selectedQuarter]} 2025`,
+        tanggalLaporan: `${randomMonth} 2025`,
         categoryLabel: categoryConfig ? categoryConfig.coverTitle : 'Laporan Kinerja',
         categoryId: selectedCategoryId,
         coverBorderIndex: randomBorderIndex
