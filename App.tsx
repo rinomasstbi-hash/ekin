@@ -109,7 +109,7 @@ const App: React.FC = () => {
       const newReport: ReportData = {
         image: selectedImage,
         profile: profile,
-        periode: `${q?.label} (${q?.range}) ${year}`,
+        periode: `${q?.label} (${q?.range})`, // Removed year
         analysis: result,
         tanggalLaporan: `${monthMap[selectedQuarter]} ${year}`,
         categoryLabel: categoryConfig ? categoryConfig.coverTitle : 'Laporan Kinerja',
