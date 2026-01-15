@@ -103,6 +103,9 @@ const App: React.FC = () => {
         4: 'Desember'
       };
 
+      // Generate random border index (0 to 4)
+      const randomBorderIndex = Math.floor(Math.random() * 5);
+
       const newReport: ReportData = {
         image: selectedImage,
         profile: profile,
@@ -110,7 +113,8 @@ const App: React.FC = () => {
         analysis: result,
         tanggalLaporan: `${monthMap[selectedQuarter]} ${year}`,
         categoryLabel: categoryConfig ? categoryConfig.coverTitle : 'Laporan Kinerja',
-        categoryId: selectedCategoryId
+        categoryId: selectedCategoryId,
+        coverBorderIndex: randomBorderIndex
       };
       
       setReportData(newReport);

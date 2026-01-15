@@ -8,7 +8,19 @@ interface Props {
 }
 
 export const ReportView: React.FC<Props> = ({ data, onReset }) => {
-  const { profile, analysis, image, periode, tanggalLaporan, categoryLabel, categoryId } = data;
+  const { profile, analysis, image, periode, tanggalLaporan, categoryLabel, categoryId, coverBorderIndex } = data;
+
+  // --- BORDER STYLES CONFIGURATION ---
+  const BORDER_STYLES = [
+    "border-4 border-double border-gray-800", // 0: Classic Double (Original)
+    "border-[6px] border-solid border-gray-900", // 1: Bold Solid
+    "border-y-[8px] border-x-[2px] border-gray-800", // 2: Art Deco Vertical
+    "border-4 border-solid border-gray-600 outline outline-offset-4 outline-2 outline-gray-400", // 3: Frame Ring
+    "border-[3px] border-dashed border-gray-500 outline outline-4 outline-gray-800", // 4: Technical
+  ];
+
+  // Fallback to 0 if index is missing
+  const activeBorderStyle = BORDER_STYLES[coverBorderIndex || 0];
 
   // --- EFFECT: SET PDF FILENAME ---
   useEffect(() => {
@@ -100,7 +112,8 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
 
       {/* --- HALAMAN 1: COVER --- */}
       <div className="sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] mb-8 print:mb-0 relative mx-auto flex flex-col justify-between">
-        <div className="flex-1 flex flex-col items-center justify-between text-center border-4 border-double border-gray-800 p-8">
+        {/* Dynamic Border Applied Here */}
+        <div className={`flex-1 flex flex-col items-center justify-between text-center p-8 ${activeBorderStyle}`}>
           
           <div className="mt-10">
             <h1 className="text-2xl font-serif font-bold tracking-widest uppercase mb-4 leading-relaxed px-4 whitespace-pre-line">
@@ -127,7 +140,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
           <div className="w-full mb-4">
             <h4 className="text-xl font-bold uppercase">{profile.unitKerja}</h4>
             <p className="text-md uppercase text-gray-600">{profile.kota}</p>
-            <p className="text-sm text-gray-500 mt-2">{new Date().getFullYear()}</p>
+            <p className="text-sm text-gray-500 mt-2">2025</p>
           </div>
         </div>
       </div>

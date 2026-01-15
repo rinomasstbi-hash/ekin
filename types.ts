@@ -27,6 +27,7 @@ export interface ReportData {
   tanggalLaporan: string;
   categoryLabel: string;
   categoryId: CategoryId;
+  coverBorderIndex: number; // Added for random border variation
 }
 
 export interface RHKCategory {
