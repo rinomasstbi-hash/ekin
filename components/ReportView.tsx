@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ReportData } from '../types';
+import { RHK_CATEGORIES } from '../constants';
 
 interface Props {
   data: ReportData;
@@ -8,6 +9,25 @@ interface Props {
 
 export const ReportView: React.FC<Props> = ({ data, onReset }) => {
   const { profile, analysis, image, periode, tanggalLaporan, categoryLabel, categoryId } = data;
+
+  // --- EFFECT: SET PDF FILENAME ---
+  useEffect(() => {
+    // Simpan judul asli aplikasi
+    const originalTitle = document.title;
+
+    // Cari judul kategori pendek (bukan coverTitle) untuk nama file
+    const categoryConfig = RHK_CATEGORIES.find(c => c.id === categoryId);
+    const categoryTitle = categoryConfig ? categoryConfig.title : 'Kinerja Guru';
+    
+    // Set judul baru. Ini akan menjadi nama file default saat Save as PDF.
+    // Format: Laporan - [Kategori RHK] - [Periode]
+    document.title = `Laporan - ${categoryTitle} - ${periode}`;
+
+    // Kembalikan ke judul asli saat keluar dari halaman laporan
+    return () => {
+      document.title = originalTitle;
+    };
+  }, [categoryId, periode]);
 
   // Function to render content dynamically based on sections
   const renderDynamicContent = () => {
