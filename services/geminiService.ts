@@ -113,8 +113,30 @@ export const analyzeImageWithGemini = async (
     const result = JSON.parse(text) as AnalysisResult;
     return result;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini Analysis Failed:", error);
-    throw new Error("Gagal menganalisis foto. Pastikan API Key benar dan koneksi internet stabil.");
+    
+    let errorMessage = "Gagal menganalisis foto. ";
+    const errStr = error.toString().toLowerCase();
+    const errMsg = error.message?.toLowerCase() || "";
+
+    // Deteksi Error 429 (Too Many Requests / Quota Exceeded)
+    if (errStr.includes("429") || errMsg.includes("quota") || errMsg.includes("limit") || errMsg.includes("too many requests")) {
+      errorMessage = "Kuota API harian (RPD) atau per menit (RPM) telah habis. Silakan coba lagi besok atau gunakan API Key lain.";
+    } 
+    // Deteksi Error 401/403 (Invalid Key)
+    else if (errStr.includes("401") || errStr.includes("403") || errMsg.includes("key") || errMsg.includes("permission")) {
+      errorMessage = "API Key tidak valid, kadaluarsa, atau tidak memiliki izin akses Gemini.";
+    }
+    // Deteksi Error 503 (Overloaded)
+    else if (errStr.includes("503") || errMsg.includes("overloaded")) {
+      errorMessage = "Server AI sedang sibuk. Silakan coba beberapa saat lagi.";
+    }
+    // Error Generic
+    else {
+      errorMessage += "Pastikan koneksi internet stabil atau coba gunakan foto lain.";
+    }
+
+    throw new Error(errorMessage);
   }
 };
