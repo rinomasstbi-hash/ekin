@@ -10,6 +10,11 @@ interface Props {
 export const ReportView: React.FC<Props> = ({ data, onReset }) => {
   const { profile, analysis, image, periode, tanggalLaporan, categoryLabel, categoryId, coverBorderIndex } = data;
 
+  // --- GET THEME CONFIG ---
+  const categoryConfig = RHK_CATEGORIES.find(c => c.id === categoryId);
+  const theme = categoryConfig?.theme;
+  const colorName = theme ? theme.primary.split('-')[1] : 'gray';
+
   // --- BORDER STYLES CONFIGURATION ---
   const BORDER_STYLES = [
     "border-4 border-double border-gray-800", // 0: Classic Double (Original)
@@ -20,7 +25,17 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
   ];
 
   // Fallback to 0 if index is missing
-  const activeBorderStyle = BORDER_STYLES[coverBorderIndex || 0];
+  let activeBorderStyle = BORDER_STYLES[coverBorderIndex || 0];
+  
+  // Apply theme color to border if theme exists (replace gray-800/900/600 with theme color)
+  if (theme) {
+    activeBorderStyle = activeBorderStyle
+      .replace(/gray-800/g, `${colorName}-800`)
+      .replace(/gray-900/g, `${colorName}-900`)
+      .replace(/gray-600/g, `${colorName}-600`)
+      .replace(/gray-500/g, `${colorName}-500`)
+      .replace(/gray-400/g, `${colorName}-400`);
+  }
 
   // --- EFFECT: SET PDF FILENAME ---
   useEffect(() => {
@@ -28,7 +43,6 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
     const originalTitle = document.title;
 
     // Cari judul kategori pendek (bukan coverTitle) untuk nama file
-    const categoryConfig = RHK_CATEGORIES.find(c => c.id === categoryId);
     const categoryTitle = categoryConfig ? categoryConfig.title : 'Kinerja Guru';
     
     // Set judul baru. Ini akan menjadi nama file default saat Save as PDF.
@@ -39,7 +53,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
     return () => {
       document.title = originalTitle;
     };
-  }, [categoryId, periode]);
+  }, [categoryId, periode, categoryConfig]);
 
   // Function to render content dynamically based on sections
   const renderDynamicContent = () => {
@@ -111,15 +125,34 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
       </div>
 
       {/* --- HALAMAN 1: COVER --- */}
-      <div className="sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] mb-8 print:mb-0 relative mx-auto flex flex-col justify-between">
+      <div className={`sheet shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] mb-8 print:mb-0 relative mx-auto flex flex-col justify-between overflow-hidden ${theme?.bgGradient || 'bg-white'}`}>
+        
+        {/* Decorative Background Patterns (Theme Based) */}
+        {theme && (
+          <>
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] opacity-[0.07] pointer-events-none transform translate-x-1/4 -translate-y-1/4 rotate-12 print:opacity-[0.05]">
+               <svg viewBox="0 0 24 24" fill="currentColor" className={`w-full h-full ${theme.primary}`}>
+                  <path d={theme.patternPath} />
+               </svg>
+            </div>
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] opacity-[0.07] pointer-events-none transform -translate-x-1/4 translate-y-1/4 -rotate-12 print:opacity-[0.05]">
+               <svg viewBox="0 0 24 24" fill="currentColor" className={`w-full h-full ${theme.primary}`}>
+                  <path d={theme.patternPath} />
+               </svg>
+            </div>
+          </>
+        )}
+
         {/* Dynamic Border Applied Here */}
-        <div className={`flex-1 flex flex-col items-center justify-between text-center p-8 ${activeBorderStyle}`}>
+        <div className={`flex-1 flex flex-col items-center justify-between text-center p-8 ${activeBorderStyle} relative z-10 bg-white/40 backdrop-blur-sm print:bg-transparent`}>
           
           <div className="mt-10">
-            <h1 className="text-2xl font-serif font-bold tracking-widest uppercase mb-4 leading-relaxed px-4 whitespace-pre-line">
+            <h1 className={`text-2xl font-serif font-bold tracking-widest uppercase mb-4 leading-relaxed px-4 whitespace-pre-line ${theme?.primary || 'text-slate-900'}`}>
               {categoryLabel || "Laporan Kinerja Guru"}
             </h1>
-            <h2 className="text-xl font-serif font-bold uppercase text-gray-700 px-4 mt-6">{analysis.judul_terpilih}</h2>
+            <h2 className={`text-xl font-serif font-bold uppercase px-4 mt-6 ${theme ? `text-${colorName}-700` : 'text-gray-700'}`}>
+              {analysis.judul_terpilih}
+            </h2>
           </div>
 
           <div className="my-8 flex flex-col items-center">
@@ -128,18 +161,22 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
               alt="Logo Kementerian Agama" 
               className="w-32 h-auto mb-6 object-contain"
             />
-            <p className="text-lg font-semibold uppercase tracking-wider text-gray-600">Periode: {periode}</p>
+            <p className={`text-lg font-semibold uppercase tracking-wider ${theme ? `text-${colorName}-600` : 'text-gray-600'}`}>
+              Periode: {periode}
+            </p>
           </div>
 
           <div className="mb-10 w-full">
             <p className="text-sm uppercase tracking-widest text-gray-500 mb-4">Disusun Oleh:</p>
-            <h3 className="text-xl font-bold border-b-2 border-gray-800 pb-2 inline-block min-w-[50%]">{profile.nama}</h3>
+            <h3 className={`text-xl font-bold border-b-2 pb-2 inline-block min-w-[50%] ${theme ? `text-slate-900 border-${colorName}-800` : 'text-slate-900 border-gray-800'}`}>
+              {profile.nama}
+            </h3>
             <p className="text-lg mt-2 font-mono">{profile.nip ? `NIP. ${profile.nip}` : '-'}</p>
           </div>
 
           <div className="w-full mb-4">
             <h4 className="text-xl font-bold uppercase">{profile.unitKerja}</h4>
-            <p className="text-md uppercase text-gray-600">{profile.kota}</p>
+            <p className={`text-md uppercase ${theme ? `text-${colorName}-700` : 'text-gray-600'}`}>{profile.kota}</p>
             <p className="text-sm text-gray-500 mt-2">2025</p>
           </div>
         </div>
