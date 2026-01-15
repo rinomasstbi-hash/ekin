@@ -336,7 +336,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
       </div>
 
       {/* --- HALAMAN 3: DOKUMENTASI & PENGESAHAN --- */}
-      <div className="sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] relative mx-auto print:mt-0 flex flex-col justify-between">
+      <div className="sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[25mm] relative mx-auto print:mt-0 mb-8 print:mb-0 flex flex-col justify-between">
         <div className="font-serif w-full h-full flex flex-col">
           
           {/* Header Internal */}
@@ -382,6 +382,45 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
 
         </div>
       </div>
+
+      {/* --- HALAMAN 4: OPTIONAL ASSESSMENT TABLE (HYBRID MODE) --- */}
+      {analysis.studentGrades && analysis.studentGrades.length > 0 && (
+         <div className={`sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[10mm] relative mx-auto print:mt-0 flex flex-col`}>
+             {/* Header Assessment: Reduced margins */}
+             <div className="text-center border-b-4 border-double border-amber-600 pb-1 mb-2">
+                <h1 className="text-base font-bold uppercase text-gray-900 tracking-wide leading-tight">Jurnal Penilaian Sikap Sosial & Spiritual</h1>
+                <h2 className="text-sm font-bold text-amber-700 leading-tight">Penguatan Moderasi Beragama</h2>
+                <div className="flex justify-between mt-1 text-[10px] font-semibold border-t border-dashed border-amber-200 pt-1 px-2">
+                   <span>Unit Kerja: {profile.unitKerja}</span>
+                   <span>Periode: {periode}</span>
+                </div>
+             </div>
+
+             {/* Content: Table */}
+             <div className="flex-1">
+                {renderAssessmentTable()}
+             </div>
+
+             {/* Footer Signature: Reduced margins */}
+             <div className="mt-2 flex justify-end shrink-0 break-inside-avoid-page">
+                <div className="text-center w-48">
+                  <p className="text-xs">{profile.kota}, {tanggalLaporan}</p>
+                  <p className="mt-0.5 mb-0 text-xs">Guru Mapel/Kelas,</p>
+                  
+                  <div className="h-14 flex items-center justify-center my-0.5">
+                    <img 
+                      src="https://drive.google.com/thumbnail?id=1gdxnC3M_VZLA--WQ5eEB66EJAO7dYm3o&sz=w500" 
+                      alt="Tanda Tangan" 
+                      className="h-full object-contain mix-blend-multiply" 
+                    />
+                  </div>
+
+                  <p className="font-bold underline text-sm">{profile.nama}</p>
+                  <p className="text-xs">NIP. {profile.nip || "-"}</p>
+                </div>
+              </div>
+          </div>
+      )}
 
     </div>
   );

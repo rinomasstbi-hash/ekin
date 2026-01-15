@@ -97,14 +97,22 @@ const App: React.FC = () => {
     }
     if (!profile || !selectedCategoryId) return;
 
-    // Validation
-    if (selectedCategoryId === 'STUDENT_ASSESSMENT') {
-      if (!studentNames.trim()) {
-        setError("Mohon isi daftar nama siswa.");
-        return;
-      }
-    } else {
-      if (!selectedImage) return;
+    // Validation Logic
+    const isPureAssessment = selectedCategoryId === 'STUDENT_ASSESSMENT';
+    const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION';
+
+    // 1. Validation for Image
+    // Image is required for everything EXCEPT 'STUDENT_ASSESSMENT'
+    if (!isPureAssessment && !selectedImage) {
+      setError("Mohon upload foto kegiatan terlebih dahulu.");
+      return;
+    }
+
+    // 2. Validation for Student Names
+    // Required ONLY for pure assessment. For Hybrid, it's optional but good to have.
+    if (isPureAssessment && !studentNames.trim()) {
+      setError("Mohon isi daftar nama siswa.");
+      return;
     }
 
     setIsAnalyzing(true);
@@ -271,7 +279,13 @@ const App: React.FC = () => {
   const currentCategory = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
   // Default fallback if not found
   const headerColor = currentCategory?.theme.headerColor || 'bg-teal-700';
-  const isAssessment = selectedCategoryId === 'STUDENT_ASSESSMENT';
+  
+  // Logic to determine what inputs to show
+  const isAssessmentOnly = selectedCategoryId === 'STUDENT_ASSESSMENT';
+  const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION';
+  
+  const showImageUpload = !isAssessmentOnly;
+  const showStudentInput = isAssessmentOnly || isHybridMod;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
@@ -327,33 +341,8 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {isAssessment ? (
-            // --- UI FOR STUDENT ASSESSMENT (TEXT INPUT) ---
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">Daftar Nama Siswa</label>
-                <textarea
-                  value={studentNames}
-                  onChange={(e) => setStudentNames(e.target.value)}
-                  placeholder="Paste nama siswa dari Excel disini...&#10;Contoh:&#10;Ahmad Dahlan&#10;Siti Walidah&#10;Ki Hajar Dewantara"
-                  className="w-full h-40 px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50 placeholder-slate-400 text-sm"
-                  disabled={isAnalyzing}
-                />
-              </div>
-              <div>
-                 <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">Kelas / Rombel</label>
-                 <input
-                  type="text"
-                  value={kelas}
-                  onChange={(e) => setKelas(e.target.value)}
-                  placeholder="Contoh: VII A / X IPA 2"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50 placeholder-slate-400"
-                  disabled={isAnalyzing}
-                />
-              </div>
-            </div>
-          ) : (
-            // --- UI FOR IMAGE UPLOAD (STANDARD) ---
+          {/* --- IMAGE UPLOAD SECTION (For All except Assessment Only) --- */}
+          {showImageUpload && (
             <div 
               onClick={() => !isAnalyzing && fileInputRef.current?.click()}
               className={`
@@ -376,7 +365,7 @@ const App: React.FC = () => {
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                   </div>
                   <h3 className="font-bold text-slate-700 text-lg">Upload Foto</h3>
-                  <p className="text-sm text-slate-400">Ambil foto kegiatan sesuai kategori</p>
+                  <p className="text-sm text-slate-400">Ambil foto kegiatan</p>
                 </>
               )}
               <input 
@@ -390,21 +379,59 @@ const App: React.FC = () => {
             </div>
           )}
 
+          {/* --- STUDENT INPUT SECTION (For Assessment Only OR Religious Moderation) --- */}
+          {showStudentInput && (
+            <div className="flex flex-col gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+               {isHybridMod && (
+                 <div className="flex items-center gap-2 text-xs font-semibold text-amber-700 mb-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Opsional: Isi data siswa untuk generate tabel nilai otomatis.</span>
+                 </div>
+               )}
+              <div>
+                <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">
+                  Daftar Nama Siswa {isHybridMod && '(Opsional)'}
+                </label>
+                <textarea
+                  value={studentNames}
+                  onChange={(e) => setStudentNames(e.target.value)}
+                  placeholder="Paste nama siswa dari Excel disini...&#10;Contoh:&#10;Ahmad Dahlan&#10;Siti Walidah"
+                  className="w-full h-32 px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:ring-0 outline-none transition-all text-slate-700 bg-white placeholder-slate-400 text-sm"
+                  disabled={isAnalyzing}
+                />
+              </div>
+              <div>
+                 <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">Kelas / Rombel {isHybridMod && '(Opsional)'}</label>
+                 <input
+                  type="text"
+                  value={kelas}
+                  onChange={(e) => setKelas(e.target.value)}
+                  placeholder="Contoh: VII A"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:ring-0 outline-none transition-all text-slate-700 bg-white placeholder-slate-400"
+                  disabled={isAnalyzing}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* --- USER NOTE SECTION --- */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-              {isAssessment ? 'Materi / Bab Pembelajaran (Opsional)' : 'Keterangan / Judul Spesifik (Opsional)'}
+              {isAssessmentOnly ? 'Materi / Bab Pembelajaran (Opsional)' : 'Keterangan / Judul Spesifik (Opsional)'}
             </label>
             <input
               type="text"
               value={userNote}
               onChange={(e) => setUserNote(e.target.value)}
-              placeholder={isAssessment ? "Contoh: Toleransi Antar Umat Beragama" : "Contoh: Upacara Bendera, Rapat Dinas..."}
+              placeholder={isAssessmentOnly ? "Contoh: Toleransi Antar Umat" : "Contoh: Kegiatan Diskusi Kelompok"}
               className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-current focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50 placeholder-slate-400"
               style={{ color: 'inherit' }}
               disabled={isAnalyzing}
             />
             <p className="text-xs text-slate-400">
-              {isAssessment ? 'AI akan memilih prinsip moderasi yang relevan dengan materi ini.' : 'Bantu AI mengenali kegiatan dengan memberikan judul atau deskripsi singkat.'}
+              {isAssessmentOnly 
+                ? 'AI akan memilih prinsip moderasi yang relevan dengan materi ini.' 
+                : 'Bantu AI mengenali kegiatan dengan memberikan judul atau deskripsi singkat.'}
             </p>
           </div>
 
@@ -437,10 +464,10 @@ const App: React.FC = () => {
 
           <button
             onClick={handleProcess}
-            disabled={(!selectedImage && !isAssessment) || (isAssessment && !studentNames) || isAnalyzing}
+            disabled={isAnalyzing}
             className={`
               w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-3 transition-all transform active:scale-[0.98]
-              ${(!selectedImage && !isAssessment) || (isAssessment && !studentNames) || isAnalyzing 
+              ${isAnalyzing 
                 ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' 
                 : `${headerColor} text-white hover:brightness-110 shadow-teal-900/10`
               }

@@ -49,7 +49,7 @@ export const analyzeImageWithGemini = async (
 
   const rhkListString = selectedCategory.rhkList.join("\n- ");
 
-  // --- BRANCH 1: STUDENT ASSESSMENT (TEXT ONLY) ---
+  // --- BRANCH 1: STUDENT ASSESSMENT ONLY (TEXT ONLY) ---
   if (categoryId === 'STUDENT_ASSESSMENT') {
     if (!studentNames) throw new Error("Daftar nama siswa diperlukan.");
     
@@ -118,37 +118,50 @@ export const analyzeImageWithGemini = async (
     }
   }
 
-  // --- BRANCH 2: IMAGE ANALYSIS (ORIGINAL) ---
+  // --- BRANCH 2: IMAGE ANALYSIS + OPTIONAL HYBRID (RELIGIOUS_MODERATION) ---
   if (!base64Image) throw new Error("Gambar diperlukan untuk kategori ini.");
   
   const cleanBase64 = base64Image.replace(/^data:image\/(png|jpg|jpeg|webp);base64,/, "");
 
   // Define structure instructions based on category
   let structureInstruction = "";
+  let additionalInstruction = "";
 
   if (categoryId === 'DIGITAL') {
     structureInstruction = `
       Buat struktur laporan dengan sections berikut:
-      1. Title: "Analisis Kebutuhan & Masalah" (Type: paragraph) -> Jelaskan masalah pembelajaran (misal: abstrak, membosankan) yang butuh solusi digital.
+      1. Title: "Analisis Kebutuhan & Masalah" (Type: paragraph) -> Jelaskan masalah pembelajaran yang butuh solusi digital.
       2. Title: "Implementasi Teknologi" (Type: paragraph) -> Deskripsikan cara penggunaan alat/aplikasi dalam kegiatan.
-      3. Title: "Spesifikasi Alat & Aplikasi" (Type: list) -> Sebutkan nama aplikasi, hardware, atau platform yang digunakan (misal: Canva, Quizizz, LCD Proyektor).
-      4. Title: "Dampak & Efektivitas" (Type: list) -> Poin-poin peningkatan hasil belajar atau motivasi siswa.
+      3. Title: "Spesifikasi Alat & Aplikasi" (Type: list) -> Sebutkan nama aplikasi, hardware, atau platform yang digunakan.
+      4. Title: "Dampak & Efektivitas" (Type: list) -> Poin-poin peningkatan hasil belajar.
     `;
   } else if (categoryId === 'CHILD_FRIENDLY') {
     structureInstruction = `
       Buat struktur laporan dengan sections berikut:
       1. Title: "Situasi & Kondisi Awal" (Type: paragraph) -> Konteks interaksi di kelas.
       2. Title: "Bentuk Layanan Ramah Anak" (Type: paragraph) -> Deskripsi pendekatan humanis, 5S, atau pencegahan bullying.
-      3. Title: "Prinsip Hak Anak" (Type: list) -> Poin hak anak yang dipenuhi (misal: Non-diskriminasi, Hak didengar).
-      4. Title: "Respon Siswa" (Type: list) -> Poin respon emosional siswa (misal: Senang, Merasa aman).
+      3. Title: "Prinsip Hak Anak" (Type: list) -> Poin hak anak yang dipenuhi.
+      4. Title: "Respon Siswa" (Type: list) -> Poin respon emosional siswa.
     `;
   } else if (categoryId === 'RELIGIOUS_MODERATION') {
     structureInstruction = `
       Buat struktur laporan dengan sections berikut:
-      1. Title: "Latar Belakang Kegiatan" (Type: paragraph) -> Konteks keberagaman atau materi ajar.
-      2. Title: "Penguatan Nilai Moderasi" (Type: paragraph) -> Narasi penanaman nilai.
-      3. Title: "Indikator Sikap Moderat" (Type: list) -> Poin sikap yang muncul (Tasamuh, Tawazun, I'tidal, Hubbul Wathon).
+      1. Title: "Latar Belakang Kegiatan" (Type: paragraph) -> Konteks keberagaman atau materi ajar dalam foto.
+      2. Title: "Penguatan Nilai Moderasi" (Type: paragraph) -> Narasi penanaman nilai yang terjadi.
+      3. Title: "Indikator Sikap Moderat" (Type: list) -> Poin sikap yang muncul dalam kegiatan.
     `;
+
+    // HYBRID LOGIC: If student names are provided, ask to generate grades too.
+    if (studentNames) {
+      additionalInstruction = `
+        TUGAS TAMBAHAN (Wajib karena ada daftar siswa):
+        1. Analisis visual foto untuk menentukan SATU Prinsip Moderasi Beragama yang paling dominan/relevan (Contoh: Tasamuh, Tawazun, Hubbul Wathon, dll). Isi ke field 'prinsipModerasi'.
+        2. Gunakan daftar nama siswa berikut:
+           ${studentNames}
+        3. Buat objek 'studentGrades'. Untuk setiap siswa, berikan nilai (SB/B/C/K) dan deskripsi sikap yang relevan dengan prinsip moderasi yang kamu temukan di foto.
+        4. Field 'kelas' diisi dengan: "${kelas || 'Umum'}".
+      `;
+    }
   } else {
     // TEACHING
     structureInstruction = `
@@ -163,17 +176,16 @@ export const analyzeImageWithGemini = async (
     Saya mengirimkan foto kegiatan guru. Konteks: ${selectedCategory.title}.
     ${userNote ? `\nCATATAN KHUSUS PENGGUNA: "${userNote}"` : ''}
     
-    Tugas:
+    Tugas Utama:
     1. Identifikasi visual foto.
     2. Pilih SATU Judul RHK yang paling cocok dari daftar:
     ${rhkListString}
-    (Jika catatan pengguna lebih spesifik, boleh sesuaikan judul sedikit agar relevan, tapi tetap mengacu pada daftar RHK).
     3. Tentukan jenis kegiatan (Intrakurikuler/Kokurikuler/Ekstrakurikuler).
-    4. Isi field 'caption':
-       - JIKA ada CATATAN KHUSUS PENGGUNA: Gunakan catatan tersebut sebagai caption.
-       - JIKA TIDAK ADA catatan: Buatlah deskripsi singkat (maksimal 1 kalimat, formal) tentang apa yang terlihat di gambar (Contoh: "Guru sedang memberikan penjelasan materi di depan kelas").
+    4. Isi field 'caption': Deskripsi singkat dan formal (1 kalimat) tentang foto.
     5. ${structureInstruction}
     
+    ${additionalInstruction}
+
     Gunakan Bahasa Indonesia formal untuk laporan resmi dinas.
   `;
 
@@ -194,6 +206,21 @@ export const analyzeImageWithGemini = async (
             judul_terpilih: { type: Type.STRING },
             jenis_kegiatan: { type: Type.STRING, enum: ["Intrakurikuler", "Kokurikuler", "Ekstrakurikuler"] },
             caption: { type: Type.STRING },
+            // Optional fields for hybrid mode
+            prinsipModerasi: { type: Type.STRING },
+            kelas: { type: Type.STRING },
+            studentGrades: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    nama: { type: Type.STRING },
+                    predikat: { type: Type.STRING, enum: ["SB", "B", "C", "K"] },
+                    deskripsi: { type: Type.STRING }
+                  },
+                  required: ["nama", "predikat", "deskripsi"]
+                }
+            },
             sections: {
               type: Type.ARRAY,
               items: {
