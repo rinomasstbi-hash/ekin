@@ -93,7 +93,7 @@ const App: React.FC = () => {
       const categoryConfig = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
       
       const q = quarters.find(item => item.id === selectedQuarter);
-      const year = new Date().getFullYear();
+      // const year = new Date().getFullYear(); // Unused if we hardcode 2025
       
       // Map quarter to the last month of that quarter for the signature date
       const monthMap: Record<number, string> = {
@@ -109,9 +109,9 @@ const App: React.FC = () => {
       const newReport: ReportData = {
         image: selectedImage,
         profile: profile,
-        periode: `${q?.label} (${q?.range})`, // Removed year
+        periode: `${q?.label} (${q?.range})`, 
         analysis: result,
-        tanggalLaporan: `${monthMap[selectedQuarter]} ${year}`,
+        tanggalLaporan: `${monthMap[selectedQuarter]} 2025`,
         categoryLabel: categoryConfig ? categoryConfig.coverTitle : 'Laporan Kinerja',
         categoryId: selectedCategoryId,
         coverBorderIndex: randomBorderIndex
