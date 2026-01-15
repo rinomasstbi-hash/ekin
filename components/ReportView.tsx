@@ -106,31 +106,41 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
     
     // Logic for dense layout if many students
     const studentCount = analysis.studentGrades.length;
-    const isVeryDense = studentCount > 30;
-    const isDense = studentCount > 20;
+    
+    // Tiered density
+    const isSuperDense = studentCount > 32;
+    const isVeryDense = studentCount > 25;
+    const isDense = studentCount > 15;
 
-    const fontSizeClass = isVeryDense ? 'text-[9px]' : isDense ? 'text-[10px]' : 'text-xs';
-    const cellPaddingClass = isVeryDense ? 'py-0.5 px-2' : isDense ? 'py-1 px-3' : 'py-2 px-4';
-    const headerPaddingClass = isVeryDense ? 'py-1 px-2' : 'py-2 px-4';
+    // Font size for general cells (No, Nama, Predikat)
+    const rowFontSize = isSuperDense ? 'text-[8px]' : isVeryDense ? 'text-[9px]' : isDense ? 'text-[10px]' : 'text-xs';
+    
+    // Font size specifically for Description (usually the longest text)
+    // using leading-none for SuperDense to maximize vertical space
+    const descFontSize = isSuperDense ? 'text-[7px] leading-none' : isVeryDense ? 'text-[8px] leading-tight' : isDense ? 'text-[9px] leading-tight' : 'text-xs';
+    
+    // Padding Logic
+    const cellPaddingClass = isSuperDense ? 'py-[1px] px-1' : isVeryDense ? 'py-0.5 px-2' : isDense ? 'py-1 px-2' : 'py-2 px-4';
+    const headerPaddingClass = isSuperDense ? 'py-1 px-1' : isVeryDense ? 'py-1 px-2' : 'py-2 px-4';
 
     return (
       <div className="w-full">
-         <div className="mb-2">
-            <h3 className="text-center font-bold text-base uppercase mb-0.5 leading-tight">{analysis.prinsipModerasi || 'Nilai Sikap'}</h3>
-            <p className="text-center text-xs text-gray-600 italic">"{analysis.caption}"</p>
+         <div className="mb-1">
+            <h3 className="text-center font-bold text-sm uppercase mb-0 leading-tight">{analysis.prinsipModerasi || 'Nilai Sikap'}</h3>
+            <p className="text-center text-[10px] text-gray-600 italic">"{analysis.caption}"</p>
          </div>
 
-         <div className="overflow-hidden border border-gray-300 rounded-lg">
-           <table className={`min-w-full ${fontSizeClass}`}>
-             <thead className="bg-amber-100">
+         <div className="overflow-hidden border border-gray-300 rounded-sm">
+           <table className={`min-w-full`}>
+             <thead className={`bg-amber-100 ${rowFontSize}`}>
                <tr>
-                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 w-10 text-center`}>No</th>
+                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 w-8 text-center`}>No</th>
                  <th className={`${headerPaddingClass} border-b border-r border-gray-300 text-left`}>Nama Siswa</th>
-                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 text-center w-16`}>Predikat</th>
+                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 text-center w-12`}>Nilai</th>
                  <th className={`${headerPaddingClass} border-b border-gray-300 text-left`}>Deskripsi Sikap</th>
                </tr>
              </thead>
-             <tbody>
+             <tbody className={rowFontSize}>
                {analysis.studentGrades.map((student, idx) => (
                  <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                    <td className={`${cellPaddingClass} border-b border-r border-gray-200 text-center`}>{idx + 1}</td>
@@ -141,15 +151,17 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                         student.predikat === 'C' ? 'text-amber-600' : 'text-red-600'}`}>
                      {student.predikat}
                    </td>
-                   <td className={`${cellPaddingClass} border-b border-gray-200 text-gray-600 italic leading-tight`}>{student.deskripsi}</td>
+                   <td className={`${cellPaddingClass} border-b border-gray-200 text-gray-600 italic ${descFontSize}`}>
+                     {student.deskripsi}
+                   </td>
                  </tr>
                ))}
              </tbody>
            </table>
          </div>
          
-         <div className="mt-2 text-[10px] text-gray-500">
-           <p><span className="font-bold">Keterangan:</span> SB = Sangat Baik, B = Baik, C = Cukup, K = Kurang</p>
+         <div className="mt-1 text-[9px] text-gray-500">
+           <p><span className="font-bold">Ket:</span> SB=Sangat Baik, B=Baik, C=Cukup, K=Kurang</p>
          </div>
       </div>
     );
@@ -178,12 +190,16 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
             </button>
           </div>
 
-          <div className={`sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[15mm] relative mx-auto print:mt-0 flex flex-col`}>
-             {/* Header Assessment */}
-             <div className="text-center border-b-4 border-double border-amber-600 pb-2 mb-4">
-                <h1 className="text-lg font-bold uppercase text-gray-900 tracking-wide leading-tight">Jurnal Penilaian Sikap Sosial & Spiritual</h1>
-                <h2 className="text-base font-bold text-amber-700 leading-tight">Penguatan Moderasi Beragama</h2>
-                <div className="flex justify-between mt-2 text-xs font-semibold border-t border-dashed border-amber-200 pt-1 px-2">
+          {/* 
+            KEY CHANGE: Padding reduced to 10mm (p-[10mm]) 
+            to allow more content on one page. 
+          */}
+          <div className={`sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[10mm] relative mx-auto print:mt-0 flex flex-col`}>
+             {/* Header Assessment: Reduced margins */}
+             <div className="text-center border-b-4 border-double border-amber-600 pb-1 mb-2">
+                <h1 className="text-base font-bold uppercase text-gray-900 tracking-wide leading-tight">Jurnal Penilaian Sikap Sosial & Spiritual</h1>
+                <h2 className="text-sm font-bold text-amber-700 leading-tight">Penguatan Moderasi Beragama</h2>
+                <div className="flex justify-between mt-1 text-[10px] font-semibold border-t border-dashed border-amber-200 pt-1 px-2">
                    <span>Unit Kerja: {profile.unitKerja}</span>
                    <span>Periode: {periode}</span>
                 </div>
@@ -194,13 +210,13 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                 {renderAssessmentTable()}
              </div>
 
-             {/* Footer Signature */}
-             <div className="mt-4 flex justify-end shrink-0 break-inside-avoid-page">
-                <div className="text-center w-56">
-                  <p className="text-sm">{profile.kota}, {tanggalLaporan}</p>
-                  <p className="mt-0.5 mb-1 text-sm">Guru Mapel/Kelas,</p>
+             {/* Footer Signature: Reduced margins */}
+             <div className="mt-2 flex justify-end shrink-0 break-inside-avoid-page">
+                <div className="text-center w-48">
+                  <p className="text-xs">{profile.kota}, {tanggalLaporan}</p>
+                  <p className="mt-0.5 mb-0 text-xs">Guru Mapel/Kelas,</p>
                   
-                  <div className="h-16 flex items-center justify-center my-1">
+                  <div className="h-14 flex items-center justify-center my-0.5">
                     <img 
                       src="https://drive.google.com/thumbnail?id=1gdxnC3M_VZLA--WQ5eEB66EJAO7dYm3o&sz=w500" 
                       alt="Tanda Tangan" 
@@ -208,8 +224,8 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                     />
                   </div>
 
-                  <p className="font-bold underline text-base">{profile.nama}</p>
-                  <p className="text-sm">NIP. {profile.nip || "-"}</p>
+                  <p className="font-bold underline text-sm">{profile.nama}</p>
+                  <p className="text-xs">NIP. {profile.nip || "-"}</p>
                 </div>
               </div>
           </div>
