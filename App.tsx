@@ -35,6 +35,7 @@ const App: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId | null>(null);
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [userNote, setUserNote] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedQuarter, setSelectedQuarter] = useState<number>(1);
@@ -89,7 +90,12 @@ const App: React.FC = () => {
     setError(null);
 
     try {
-      const result: AnalysisResult = await analyzeImageWithGemini(API_KEY, selectedImage, selectedCategoryId);
+      const result: AnalysisResult = await analyzeImageWithGemini(
+        API_KEY, 
+        selectedImage, 
+        selectedCategoryId,
+        userNote // Pass the user note here
+      );
       const categoryConfig = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
       
       const q = quarters.find(item => item.id === selectedQuarter);
@@ -128,12 +134,14 @@ const App: React.FC = () => {
   const resetAll = () => {
     setReportData(null);
     setSelectedImage(null);
+    setUserNote(''); // Reset user note
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleBackToMenu = () => {
     setSelectedCategoryId(null);
     setSelectedImage(null);
+    setUserNote('');
     setError(null);
   };
 
@@ -277,6 +285,24 @@ const App: React.FC = () => {
               className="hidden" 
               disabled={isAnalyzing}
             />
+          </div>
+
+          {/* New Input Field for User Note */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+              Keterangan / Judul Spesifik (Opsional)
+            </label>
+            <input
+              type="text"
+              value={userNote}
+              onChange={(e) => setUserNote(e.target.value)}
+              placeholder="Contoh: Upacara Bendera, Rapat Dinas, Praktik IPA..."
+              className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-teal-500 focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50 placeholder-slate-400"
+              disabled={isAnalyzing}
+            />
+            <p className="text-xs text-slate-400">
+              Bantu AI mengenali kegiatan dengan memberikan judul atau deskripsi singkat.
+            </p>
           </div>
 
           {error && (

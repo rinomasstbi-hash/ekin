@@ -5,7 +5,8 @@ import { AnalysisResult, CategoryId } from "../types";
 export const analyzeImageWithGemini = async (
   apiKey: string,
   base64Image: string,
-  categoryId: CategoryId
+  categoryId: CategoryId,
+  userNote?: string
 ): Promise<AnalysisResult> => {
   const ai = new GoogleGenAI({ apiKey });
   const model = "gemini-2.5-flash"; 
@@ -55,11 +56,13 @@ export const analyzeImageWithGemini = async (
 
   const prompt = `
     Saya mengirimkan foto kegiatan guru. Konteks: ${selectedCategory.title}.
+    ${userNote ? `\nCATATAN KHUSUS PENGGUNA (Gunakan ini sebagai acuan utama judul/deskripsi): ${userNote}` : ''}
     
     Tugas:
     1. Identifikasi visual foto.
     2. Pilih SATU Judul RHK yang paling cocok dari daftar:
     ${rhkListString}
+    (Jika catatan pengguna lebih spesifik, boleh sesuaikan judul sedikit agar relevan, tapi tetap mengacu pada daftar RHK).
     3. Tentukan jenis kegiatan (Intrakurikuler/Kokurikuler/Ekstrakurikuler).
     4. ${structureInstruction}
     
