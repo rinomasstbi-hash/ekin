@@ -2,6 +2,36 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { RHK_CATEGORIES } from "../constants";
 import { AnalysisResult, CategoryId } from "../types";
 
+// Helper for robust error parsing
+const handleGeminiError = (error: any, contextPrefix: string): never => {
+  console.error(`Gemini Error [${contextPrefix}]:`, error);
+
+  let finalMessage = "";
+  const errString = error.toString().toLowerCase();
+  const errMessage = (error.message || "").toLowerCase();
+  
+  // Check strict codes first
+  const isQuota = errString.includes("429") || errMessage.includes("quota") || errMessage.includes("limit") || errMessage.includes("resource_exhausted");
+  const isAuth = errString.includes("401") || errString.includes("403") || errMessage.includes("key") || errMessage.includes("permission");
+  const isOverload = errString.includes("503") || errMessage.includes("overloaded");
+  
+  if (isQuota) {
+    finalMessage = "Kuota API Harian/Menit Telah Habis. Mohon gunakan API Key Google Gemini milik Anda sendiri (Gratis di aistudio.google.com).";
+  } else if (isAuth) {
+    finalMessage = "API Key tidak valid atau tidak memiliki izin akses.";
+  } else if (isOverload) {
+    finalMessage = "Server Google AI sedang sibuk. Silakan coba sesaat lagi.";
+  } else {
+    // Clean up generic error messages
+    const rawMsg = error.message || "Terjadi kesalahan tidak terduga.";
+    // Remove JSON garbage if present in message
+    const cleanMsg = rawMsg.replace(/\{.*"error".*\}/g, "Detail error teknis (lihat console).");
+    finalMessage = `${contextPrefix}: ${cleanMsg}`;
+  }
+
+  throw new Error(finalMessage);
+};
+
 export const analyzeImageWithGemini = async (
   apiKey: string,
   base64Image: string | null, // Made nullable
@@ -84,8 +114,7 @@ export const analyzeImageWithGemini = async (
       return result;
 
     } catch (error: any) {
-      console.error("Gemini Assessment Error:", error);
-      throw new Error("Gagal membuat penilaian siswa: " + error.message);
+      handleGeminiError(error, "Gagal membuat penilaian siswa");
     }
   }
 
@@ -190,29 +219,6 @@ export const analyzeImageWithGemini = async (
     return result;
 
   } catch (error: any) {
-    console.error("Gemini Analysis Failed:", error);
-    
-    let errorMessage = "Gagal menganalisis foto. ";
-    const errStr = error.toString().toLowerCase();
-    const errMsg = error.message?.toLowerCase() || "";
-
-    // Deteksi Error 429 (Too Many Requests / Quota Exceeded)
-    if (errStr.includes("429") || errMsg.includes("quota") || errMsg.includes("limit") || errMsg.includes("too many requests")) {
-      errorMessage = "Kuota API harian (RPD) atau per menit (RPM) telah habis. Silakan coba lagi besok atau gunakan API Key lain.";
-    } 
-    // Deteksi Error 401/403 (Invalid Key)
-    else if (errStr.includes("401") || errStr.includes("403") || errMsg.includes("key") || errMsg.includes("permission")) {
-      errorMessage = "API Key tidak valid, kadaluarsa, atau tidak memiliki izin akses Gemini.";
-    }
-    // Deteksi Error 503 (Overloaded)
-    else if (errStr.includes("503") || errMsg.includes("overloaded")) {
-      errorMessage = "Server AI sedang sibuk. Silakan coba beberapa saat lagi.";
-    }
-    // Error Generic
-    else {
-      errorMessage += "Pastikan koneksi internet stabil atau coba gunakan foto lain.";
-    }
-
-    throw new Error(errorMessage);
+    handleGeminiError(error, "Gagal menganalisis foto");
   }
 };
