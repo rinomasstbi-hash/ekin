@@ -6,7 +6,8 @@ import { RHK_CATEGORIES } from './constants';
 import { analyzeImageWithGemini } from './services/geminiService';
 
 const App: React.FC = () => {
-  const API_KEY = (() => {
+  // 1. Get Environment Key
+  const ENV_API_KEY = (() => {
     try {
       // @ts-ignore
       if (typeof import.meta !== 'undefined' && import.meta.env) {
@@ -23,6 +24,12 @@ const App: React.FC = () => {
     }
     return '';
   })();
+
+  // 2. State for Custom User Key
+  const [customApiKey, setCustomApiKey] = useState<string>('');
+
+  // 3. Determine Effective Key (User Input > Env Var)
+  const EFFECTIVE_API_KEY = customApiKey || ENV_API_KEY;
 
   const [profile, setProfile] = useState<TeacherProfile | null>(() => {
     if (typeof window !== 'undefined') {
@@ -79,8 +86,8 @@ const App: React.FC = () => {
   };
 
   const handleProcess = async () => {
-    if (!API_KEY) {
-      setError("Konfigurasi Error: API Key tidak ditemukan.");
+    if (!EFFECTIVE_API_KEY) {
+      setError("Konfigurasi Error: API Key tidak ditemukan. Masukkan API Key Anda.");
       return;
     }
     if (!selectedImage || !selectedCategoryId) return;
@@ -91,7 +98,7 @@ const App: React.FC = () => {
 
     try {
       const result: AnalysisResult = await analyzeImageWithGemini(
-        API_KEY, 
+        EFFECTIVE_API_KEY, 
         selectedImage, 
         selectedCategoryId,
         userNote // Pass the user note here
@@ -99,7 +106,6 @@ const App: React.FC = () => {
       const categoryConfig = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
       
       const q = quarters.find(item => item.id === selectedQuarter);
-      // const year = new Date().getFullYear(); // Unused if we hardcode 2025
       
       // Map quarter to the last month of that quarter for the signature date
       const monthMap: Record<number, string> = {
@@ -135,6 +141,7 @@ const App: React.FC = () => {
     setReportData(null);
     setSelectedImage(null);
     setUserNote(''); // Reset user note
+    setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -145,13 +152,34 @@ const App: React.FC = () => {
     setError(null);
   };
 
-  if (!API_KEY) {
+  // Logic: Show setup screen ONLY if neither Env Key nor Custom Key is present AND user hasn't tried to input one yet.
+  // However, we want to allow user to input key inside the main UI if Env key is missing too.
+  // For now, if no Env Key, we just let the main UI render but it will error out or we can show the error box immediately.
+  // Let's keep the blocking UI only if absolutely nothing is configured, but since we added input in error box, we can be more lenient.
+  
+  if (!EFFECTIVE_API_KEY && !error && !ENV_API_KEY) {
+    // Initial State: No Env Key found, prompting user before entering app
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-        <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-yellow-500 max-w-md">
-           <h2 className="text-xl font-bold mb-2">API Key Required</h2>
-           <p className="text-slate-600 mb-4">Harap konfigurasi VITE_API_KEY di Netlify Environment Variables.</p>
-           <button onClick={() => window.location.reload()} className="bg-teal-600 text-white px-4 py-2 rounded">Refresh</button>
+        <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-yellow-500 max-w-md w-full">
+           <h2 className="text-xl font-bold mb-2">API Key Diperlukan</h2>
+           <p className="text-slate-600 mb-4 text-sm">Aplikasi ini memerlukan Google Gemini API Key. Anda dapat menggunakan API Key gratis Anda sendiri.</p>
+           <input 
+              type="password" 
+              placeholder="Tempel API Key disini..."
+              className="w-full px-4 py-2 border border-slate-300 rounded mb-4"
+              onChange={(e) => setCustomApiKey(e.target.value)}
+           />
+           <p className="text-xs text-slate-500 mb-4">
+             Dapatkan key di <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-blue-600 underline">Google AI Studio</a>.
+           </p>
+           <button 
+            disabled={!customApiKey}
+            onClick={() => {}} // Just rerenders due to state change
+            className="w-full bg-teal-600 text-white px-4 py-2 rounded disabled:opacity-50 hover:bg-teal-700 transition"
+           >
+             Mulai Aplikasi
+           </button>
         </div>
       </div>
     );
@@ -306,9 +334,30 @@ const App: React.FC = () => {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm flex items-start gap-3 animate-fade-in">
-              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              <span>{error}</span>
+            <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-sm flex flex-col gap-3 animate-fade-in">
+              <div className="flex items-start gap-3 text-red-600">
+                <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>{error}</span>
+              </div>
+              
+              {/* Fallback Input for API Key */}
+              <div className="bg-white/60 p-3 rounded-lg border border-red-200 mt-1">
+                <label className="block text-xs font-bold text-red-800 mb-1 uppercase tracking-wider">
+                  Gunakan API Key Pribadi (Sementara)
+                </label>
+                <div className="flex gap-2">
+                  <input 
+                    type="password"
+                    value={customApiKey}
+                    onChange={(e) => setCustomApiKey(e.target.value)}
+                    placeholder="Paste Gemini API Key disini..."
+                    className="flex-1 text-sm px-3 py-2 border border-red-200 rounded focus:border-red-500 outline-none"
+                  />
+                </div>
+                <p className="text-[10px] text-red-500 mt-2">
+                   Jika limit aplikasi habis, Anda dapat menggunakan Free API Key milik sendiri. <a href="https://aistudio.google.com/app/apikey" target="_blank" className="underline font-bold hover:text-red-700">Buat Key Disini</a>.
+                </p>
+              </div>
             </div>
           )}
 
@@ -334,7 +383,7 @@ const App: React.FC = () => {
             ) : (
               <>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                Analisis AI
+                {customApiKey ? 'Coba Lagi dengan Key Baru' : 'Analisis AI'}
               </>
             )}
           </button>
