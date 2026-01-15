@@ -115,5 +115,30 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       "Doa bersama untuk keselamatan bangsa",
       "Integrasi nilai moderasi dalam materi pelajaran"
     ]
+  },
+  {
+    id: 'STUDENT_ASSESSMENT',
+    title: 'Penilaian Moderasi Siswa',
+    description: 'Input nama siswa dan generate tabel nilai sikap moderasi beragama otomatis.',
+    icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
+    coverTitle: 'Jurnal Penilaian Sikap\nPenguatan Moderasi Beragama',
+    theme: {
+      primary: 'text-amber-800',
+      secondary: 'bg-amber-50',
+      accent: 'text-amber-600',
+      bgGradient: 'from-amber-50 to-white',
+      headerColor: 'bg-amber-600',
+      // Pattern: Scales / Balance / Checklist
+      patternPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
+    },
+    rhkList: [
+      "Penilaian Sikap Toleransi (Tasamuh)",
+      "Penilaian Sikap Adil & Seimbang (Tawazun)",
+      "Penilaian Sikap Cinta Tanah Air (Hubbul Wathon)",
+      "Penilaian Sikap Musyawarah (Syura)",
+      "Penilaian Sikap Anti-Kekerasan (La' Unf)",
+      "Penilaian Sikap Menghargai Tradisi (Urf)",
+      "Penilaian Sikap Pelopor Kebaikan (Ishlah)"
+    ]
   }
 ];

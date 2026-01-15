@@ -101,6 +101,113 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
     );
   };
 
+  const renderAssessmentTable = () => {
+    if (!analysis.studentGrades) return null;
+    return (
+      <div className="w-full">
+         <div className="mb-4">
+            <h3 className="text-center font-bold text-lg uppercase mb-1">{analysis.prinsipModerasi || 'Nilai Sikap'}</h3>
+            <p className="text-center text-sm text-gray-600 italic">"{analysis.caption}"</p>
+         </div>
+
+         <div className="overflow-hidden border border-gray-300 rounded-lg">
+           <table className="min-w-full text-sm">
+             <thead className="bg-amber-100">
+               <tr>
+                 <th className="px-4 py-2 border-b border-r border-gray-300 w-12 text-center">No</th>
+                 <th className="px-4 py-2 border-b border-r border-gray-300 text-left">Nama Siswa</th>
+                 <th className="px-4 py-2 border-b border-r border-gray-300 text-center w-20">Predikat</th>
+                 <th className="px-4 py-2 border-b border-gray-300 text-left">Deskripsi Sikap</th>
+               </tr>
+             </thead>
+             <tbody>
+               {analysis.studentGrades.map((student, idx) => (
+                 <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                   <td className="px-4 py-2 border-b border-r border-gray-200 text-center">{idx + 1}</td>
+                   <td className="px-4 py-2 border-b border-r border-gray-200 font-medium">{student.nama}</td>
+                   <td className={`px-4 py-2 border-b border-r border-gray-200 text-center font-bold 
+                      ${student.predikat === 'SB' ? 'text-blue-600' : 
+                        student.predikat === 'B' ? 'text-green-600' : 
+                        student.predikat === 'C' ? 'text-amber-600' : 'text-red-600'}`}>
+                     {student.predikat}
+                   </td>
+                   <td className="px-4 py-2 border-b border-gray-200 text-xs text-gray-600 italic">{student.deskripsi}</td>
+                 </tr>
+               ))}
+             </tbody>
+           </table>
+         </div>
+         
+         <div className="mt-4 text-xs text-gray-500">
+           <p><span className="font-bold">Keterangan:</span> SB = Sangat Baik, B = Baik, C = Cukup, K = Kurang</p>
+         </div>
+      </div>
+    );
+  };
+
+  // IF CATEGORY IS STUDENT ASSESSMENT, RENDER SPECIAL VIEW (SINGLE PAGE PREFERRED)
+  if (categoryId === 'STUDENT_ASSESSMENT') {
+     return (
+       <div className="flex flex-col items-center w-full bg-gray-100 min-h-screen p-4 sm:p-8 print:p-0 print:bg-white print:block">
+          {/* Floating Action Bar (Hidden when printing) */}
+          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex gap-4 bg-white px-6 py-3 rounded-full shadow-xl border border-gray-200 z-50 print:hidden transition-transform hover:-translate-y-1">
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-800"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+              Cetak PDF
+            </button>
+            <div className="w-px bg-gray-300"></div>
+            <button
+              onClick={onReset}
+              className="flex items-center gap-2 text-red-600 font-semibold hover:text-red-800"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              Buat Baru
+            </button>
+          </div>
+
+          <div className={`sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[20mm] relative mx-auto print:mt-0 flex flex-col`}>
+             {/* Header Assessment */}
+             <div className="text-center border-b-4 border-double border-amber-600 pb-4 mb-6">
+                <h1 className="text-xl font-bold uppercase text-gray-900 tracking-wide">Jurnal Penilaian Sikap Sosial & Spiritual</h1>
+                <h2 className="text-lg font-bold text-amber-700">Penguatan Moderasi Beragama</h2>
+                <div className="flex justify-between mt-4 text-sm font-semibold border-t border-dashed border-amber-200 pt-2 px-4">
+                   <span>Unit Kerja: {profile.unitKerja}</span>
+                   <span>Periode: {periode}</span>
+                </div>
+             </div>
+
+             {/* Content: Table */}
+             <div className="flex-1">
+                {renderAssessmentTable()}
+             </div>
+
+             {/* Footer Signature */}
+             <div className="mt-8 flex justify-end shrink-0 break-inside-avoid-page">
+                <div className="text-center w-64">
+                  <p>{profile.kota}, {tanggalLaporan}</p>
+                  <p className="mt-1 mb-2">Guru Mapel/Kelas,</p>
+                  
+                  <div className="h-20 flex items-center justify-center my-2">
+                    <img 
+                      src="https://drive.google.com/thumbnail?id=1gdxnC3M_VZLA--WQ5eEB66EJAO7dYm3o&sz=w500" 
+                      alt="Tanda Tangan" 
+                      className="h-full object-contain mix-blend-multiply" 
+                    />
+                  </div>
+
+                  <p className="font-bold underline text-lg">{profile.nama}</p>
+                  <p className="text-md">NIP. {profile.nip || "-"}</p>
+                </div>
+              </div>
+          </div>
+       </div>
+     );
+  }
+
+  // --- STANDARD REPORT VIEW (FOR OTHER CATEGORIES) ---
   return (
     // Wrapper print settings
     <div className="flex flex-col items-center w-full bg-gray-100 min-h-screen p-4 sm:p-8 print:p-0 print:bg-white print:block">
@@ -216,11 +323,13 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
             <h3 className="font-bold text-lg mb-4 border-b border-gray-200 pb-1">D. Dokumentasi Kegiatan</h3>
             
             <div className="flex-1 border border-gray-300 bg-gray-50 rounded-lg p-4 flex items-center justify-center overflow-hidden max-h-[140mm]">
-              <img 
-                src={image} 
-                alt="Bukti Kegiatan" 
-                className="w-full h-full object-contain" 
-              />
+              {image && (
+                <img 
+                  src={image} 
+                  alt="Bukti Kegiatan" 
+                  className="w-full h-full object-contain" 
+                />
+              )}
             </div>
             <p className="text-center text-sm text-gray-500 mt-2 italic">Gambar 1.1: {analysis.caption}</p>
           </div>

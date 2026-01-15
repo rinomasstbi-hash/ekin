@@ -42,6 +42,11 @@ const App: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId | null>(null);
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
+  // States for Student Assessment
+  const [studentNames, setStudentNames] = useState<string>('');
+  const [kelas, setKelas] = useState<string>('');
+
   const [userNote, setUserNote] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,8 +95,17 @@ const App: React.FC = () => {
       setError("Konfigurasi Error: API Key tidak ditemukan. Masukkan API Key Anda.");
       return;
     }
-    if (!selectedImage || !selectedCategoryId) return;
-    if (!profile) return;
+    if (!profile || !selectedCategoryId) return;
+
+    // Validation
+    if (selectedCategoryId === 'STUDENT_ASSESSMENT') {
+      if (!studentNames.trim()) {
+        setError("Mohon isi daftar nama siswa.");
+        return;
+      }
+    } else {
+      if (!selectedImage) return;
+    }
 
     setIsAnalyzing(true);
     setError(null);
@@ -99,9 +113,11 @@ const App: React.FC = () => {
     try {
       const result: AnalysisResult = await analyzeImageWithGemini(
         EFFECTIVE_API_KEY, 
-        selectedImage, 
+        selectedImage, // Can be null for assessment
         selectedCategoryId,
-        userNote // Pass the user note here
+        userNote,
+        studentNames,
+        kelas
       );
       const categoryConfig = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
       
@@ -135,7 +151,7 @@ const App: React.FC = () => {
       
       setReportData(newReport);
     } catch (err: any) {
-      setError(err.message || "Terjadi kesalahan saat memproses gambar.");
+      setError(err.message || "Terjadi kesalahan saat memproses data.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -144,7 +160,9 @@ const App: React.FC = () => {
   const resetAll = () => {
     setReportData(null);
     setSelectedImage(null);
-    setUserNote(''); // Reset user note
+    setUserNote(''); 
+    setStudentNames('');
+    setKelas('');
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -153,6 +171,8 @@ const App: React.FC = () => {
     setSelectedCategoryId(null);
     setSelectedImage(null);
     setUserNote('');
+    setStudentNames('');
+    setKelas('');
     setError(null);
   };
 
@@ -210,7 +230,7 @@ const App: React.FC = () => {
               </button>
            </header>
 
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {RHK_CATEGORIES.map((cat) => (
                 <button
                   key={cat.id}
@@ -238,7 +258,7 @@ const App: React.FC = () => {
                   
                   <div className="relative z-10">
                     <h3 className={`text-lg font-bold mb-1 ${cat.theme.primary}`}>{cat.title}</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed opacity-90">{cat.description}</p>
+                    <p className="text-sm text-slate-600 leading-relaxed opacity-90 line-clamp-2">{cat.description}</p>
                   </div>
                 </button>
               ))}
@@ -251,6 +271,7 @@ const App: React.FC = () => {
   const currentCategory = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
   // Default fallback if not found
   const headerColor = currentCategory?.theme.headerColor || 'bg-teal-700';
+  const isAssessment = selectedCategoryId === 'STUDENT_ASSESSMENT';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
@@ -306,56 +327,84 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div 
-            onClick={() => !isAnalyzing && fileInputRef.current?.click()}
-            className={`
-              relative group cursor-pointer rounded-3xl border-2 border-dashed transition-all duration-300 overflow-hidden aspect-video flex flex-col items-center justify-center text-center p-6
-              ${selectedImage ? 'border-transparent bg-slate-50' : 'border-slate-300 hover:border-current hover:bg-slate-50'}
-              ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}
-              ${currentCategory?.theme.accent || 'text-teal-600'}
-            `}
-          >
-            {selectedImage ? (
-              <>
-                <img src={selectedImage} alt="Preview" className="absolute inset-0 w-full h-full object-contain z-0 bg-black/5" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 text-white font-medium">
-                  Ganti Foto
-                </div>
-              </>
-            ) : (
-              <>
-                <div className={`p-4 rounded-full mb-3 group-hover:scale-110 transition-transform ${currentCategory?.theme.secondary || 'bg-teal-50'}`}>
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </div>
-                <h3 className="font-bold text-slate-700 text-lg">Upload Foto</h3>
-                <p className="text-sm text-slate-400">Ambil foto kegiatan sesuai kategori</p>
-              </>
-            )}
-            <input 
-              type="file" 
-              ref={fileInputRef}
-              onChange={handleFileChange} 
-              accept="image/*" 
-              className="hidden" 
-              disabled={isAnalyzing}
-            />
-          </div>
+          {isAssessment ? (
+            // --- UI FOR STUDENT ASSESSMENT (TEXT INPUT) ---
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">Daftar Nama Siswa</label>
+                <textarea
+                  value={studentNames}
+                  onChange={(e) => setStudentNames(e.target.value)}
+                  placeholder="Paste nama siswa dari Excel disini...&#10;Contoh:&#10;Ahmad Dahlan&#10;Siti Walidah&#10;Ki Hajar Dewantara"
+                  className="w-full h-40 px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50 placeholder-slate-400 text-sm"
+                  disabled={isAnalyzing}
+                />
+              </div>
+              <div>
+                 <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">Kelas / Rombel</label>
+                 <input
+                  type="text"
+                  value={kelas}
+                  onChange={(e) => setKelas(e.target.value)}
+                  placeholder="Contoh: VII A / X IPA 2"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50 placeholder-slate-400"
+                  disabled={isAnalyzing}
+                />
+              </div>
+            </div>
+          ) : (
+            // --- UI FOR IMAGE UPLOAD (STANDARD) ---
+            <div 
+              onClick={() => !isAnalyzing && fileInputRef.current?.click()}
+              className={`
+                relative group cursor-pointer rounded-3xl border-2 border-dashed transition-all duration-300 overflow-hidden aspect-video flex flex-col items-center justify-center text-center p-6
+                ${selectedImage ? 'border-transparent bg-slate-50' : 'border-slate-300 hover:border-current hover:bg-slate-50'}
+                ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}
+                ${currentCategory?.theme.accent || 'text-teal-600'}
+              `}
+            >
+              {selectedImage ? (
+                <>
+                  <img src={selectedImage} alt="Preview" className="absolute inset-0 w-full h-full object-contain z-0 bg-black/5" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 text-white font-medium">
+                    Ganti Foto
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={`p-4 rounded-full mb-3 group-hover:scale-110 transition-transform ${currentCategory?.theme.secondary || 'bg-teal-50'}`}>
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                  </div>
+                  <h3 className="font-bold text-slate-700 text-lg">Upload Foto</h3>
+                  <p className="text-sm text-slate-400">Ambil foto kegiatan sesuai kategori</p>
+                </>
+              )}
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                onChange={handleFileChange} 
+                accept="image/*" 
+                className="hidden" 
+                disabled={isAnalyzing}
+              />
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-              Keterangan / Judul Spesifik (Opsional)
+              {isAssessment ? 'Materi / Bab Pembelajaran (Opsional)' : 'Keterangan / Judul Spesifik (Opsional)'}
             </label>
             <input
               type="text"
               value={userNote}
               onChange={(e) => setUserNote(e.target.value)}
-              placeholder="Contoh: Upacara Bendera, Rapat Dinas, Praktik IPA..."
+              placeholder={isAssessment ? "Contoh: Toleransi Antar Umat Beragama" : "Contoh: Upacara Bendera, Rapat Dinas..."}
               className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-current focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50 placeholder-slate-400"
               style={{ color: 'inherit' }}
               disabled={isAnalyzing}
             />
             <p className="text-xs text-slate-400">
-              Bantu AI mengenali kegiatan dengan memberikan judul atau deskripsi singkat.
+              {isAssessment ? 'AI akan memilih prinsip moderasi yang relevan dengan materi ini.' : 'Bantu AI mengenali kegiatan dengan memberikan judul atau deskripsi singkat.'}
             </p>
           </div>
 
@@ -388,10 +437,10 @@ const App: React.FC = () => {
 
           <button
             onClick={handleProcess}
-            disabled={!selectedImage || isAnalyzing}
+            disabled={(!selectedImage && !isAssessment) || (isAssessment && !studentNames) || isAnalyzing}
             className={`
               w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-3 transition-all transform active:scale-[0.98]
-              ${!selectedImage || isAnalyzing 
+              ${(!selectedImage && !isAssessment) || (isAssessment && !studentNames) || isAnalyzing 
                 ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' 
                 : `${headerColor} text-white hover:brightness-110 shadow-teal-900/10`
               }
@@ -408,7 +457,7 @@ const App: React.FC = () => {
             ) : (
               <>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                {customApiKey ? 'Coba Lagi dengan Key Baru' : 'Analisis AI'}
+                {customApiKey ? 'Coba Lagi dengan Key Baru' : 'Proses Data AI'}
               </>
             )}
           </button>

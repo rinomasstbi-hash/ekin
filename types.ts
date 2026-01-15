@@ -11,24 +11,33 @@ export interface ReportSection {
   content: string[]; // For paragraph, it's an array with 1 string. For list, multiple strings.
 }
 
-export interface AnalysisResult {
-  judul_terpilih: string;
-  jenis_kegiatan: 'Intrakurikuler' | 'Kokurikuler' | 'Ekstrakurikuler';
-  caption: string; // Deskripsi gambar (dari user input atau AI generated)
-  sections: ReportSection[];
+export interface StudentGrade {
+  nama: string;
+  predikat: 'SB' | 'B' | 'C' | 'K';
+  deskripsi: string;
 }
 
-export type CategoryId = 'TEACHING' | 'DIGITAL' | 'CHILD_FRIENDLY' | 'RELIGIOUS_MODERATION';
+export interface AnalysisResult {
+  judul_terpilih: string;
+  jenis_kegiatan: 'Intrakurikuler' | 'Kokurikuler' | 'Ekstrakurikuler' | 'Penilaian Pembelajaran';
+  caption: string; // Deskripsi gambar atau Konteks Materi
+  sections: ReportSection[];
+  studentGrades?: StudentGrade[]; // Optional data for assessment category
+  kelas?: string; // Optional data
+  prinsipModerasi?: string; // Optional data
+}
+
+export type CategoryId = 'TEACHING' | 'DIGITAL' | 'CHILD_FRIENDLY' | 'RELIGIOUS_MODERATION' | 'STUDENT_ASSESSMENT';
 
 export interface ReportData {
-  image: string; // Base64
+  image: string | null; // Base64 or null for text-only reports
   profile: TeacherProfile;
   periode: string;
   analysis: AnalysisResult;
   tanggalLaporan: string;
   categoryLabel: string;
   categoryId: CategoryId;
-  coverBorderIndex: number; // Added for random border variation
+  coverBorderIndex: number;
 }
 
 export interface ThemeConfig {
