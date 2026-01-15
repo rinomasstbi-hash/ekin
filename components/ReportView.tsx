@@ -103,42 +103,52 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
 
   const renderAssessmentTable = () => {
     if (!analysis.studentGrades) return null;
+    
+    // Logic for dense layout if many students
+    const studentCount = analysis.studentGrades.length;
+    const isVeryDense = studentCount > 30;
+    const isDense = studentCount > 20;
+
+    const fontSizeClass = isVeryDense ? 'text-[9px]' : isDense ? 'text-[10px]' : 'text-xs';
+    const cellPaddingClass = isVeryDense ? 'py-0.5 px-2' : isDense ? 'py-1 px-3' : 'py-2 px-4';
+    const headerPaddingClass = isVeryDense ? 'py-1 px-2' : 'py-2 px-4';
+
     return (
       <div className="w-full">
-         <div className="mb-4">
-            <h3 className="text-center font-bold text-lg uppercase mb-1">{analysis.prinsipModerasi || 'Nilai Sikap'}</h3>
-            <p className="text-center text-sm text-gray-600 italic">"{analysis.caption}"</p>
+         <div className="mb-2">
+            <h3 className="text-center font-bold text-base uppercase mb-0.5 leading-tight">{analysis.prinsipModerasi || 'Nilai Sikap'}</h3>
+            <p className="text-center text-xs text-gray-600 italic">"{analysis.caption}"</p>
          </div>
 
          <div className="overflow-hidden border border-gray-300 rounded-lg">
-           <table className="min-w-full text-sm">
+           <table className={`min-w-full ${fontSizeClass}`}>
              <thead className="bg-amber-100">
                <tr>
-                 <th className="px-4 py-2 border-b border-r border-gray-300 w-12 text-center">No</th>
-                 <th className="px-4 py-2 border-b border-r border-gray-300 text-left">Nama Siswa</th>
-                 <th className="px-4 py-2 border-b border-r border-gray-300 text-center w-20">Predikat</th>
-                 <th className="px-4 py-2 border-b border-gray-300 text-left">Deskripsi Sikap</th>
+                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 w-10 text-center`}>No</th>
+                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 text-left`}>Nama Siswa</th>
+                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 text-center w-16`}>Predikat</th>
+                 <th className={`${headerPaddingClass} border-b border-gray-300 text-left`}>Deskripsi Sikap</th>
                </tr>
              </thead>
              <tbody>
                {analysis.studentGrades.map((student, idx) => (
                  <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                   <td className="px-4 py-2 border-b border-r border-gray-200 text-center">{idx + 1}</td>
-                   <td className="px-4 py-2 border-b border-r border-gray-200 font-medium">{student.nama}</td>
-                   <td className={`px-4 py-2 border-b border-r border-gray-200 text-center font-bold 
+                   <td className={`${cellPaddingClass} border-b border-r border-gray-200 text-center`}>{idx + 1}</td>
+                   <td className={`${cellPaddingClass} border-b border-r border-gray-200 font-medium whitespace-nowrap`}>{student.nama}</td>
+                   <td className={`${cellPaddingClass} border-b border-r border-gray-200 text-center font-bold 
                       ${student.predikat === 'SB' ? 'text-blue-600' : 
                         student.predikat === 'B' ? 'text-green-600' : 
                         student.predikat === 'C' ? 'text-amber-600' : 'text-red-600'}`}>
                      {student.predikat}
                    </td>
-                   <td className="px-4 py-2 border-b border-gray-200 text-xs text-gray-600 italic">{student.deskripsi}</td>
+                   <td className={`${cellPaddingClass} border-b border-gray-200 text-gray-600 italic leading-tight`}>{student.deskripsi}</td>
                  </tr>
                ))}
              </tbody>
            </table>
          </div>
          
-         <div className="mt-4 text-xs text-gray-500">
+         <div className="mt-2 text-[10px] text-gray-500">
            <p><span className="font-bold">Keterangan:</span> SB = Sangat Baik, B = Baik, C = Cukup, K = Kurang</p>
          </div>
       </div>
@@ -168,12 +178,12 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
             </button>
           </div>
 
-          <div className={`sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[20mm] relative mx-auto print:mt-0 flex flex-col`}>
+          <div className={`sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[15mm] relative mx-auto print:mt-0 flex flex-col`}>
              {/* Header Assessment */}
-             <div className="text-center border-b-4 border-double border-amber-600 pb-4 mb-6">
-                <h1 className="text-xl font-bold uppercase text-gray-900 tracking-wide">Jurnal Penilaian Sikap Sosial & Spiritual</h1>
-                <h2 className="text-lg font-bold text-amber-700">Penguatan Moderasi Beragama</h2>
-                <div className="flex justify-between mt-4 text-sm font-semibold border-t border-dashed border-amber-200 pt-2 px-4">
+             <div className="text-center border-b-4 border-double border-amber-600 pb-2 mb-4">
+                <h1 className="text-lg font-bold uppercase text-gray-900 tracking-wide leading-tight">Jurnal Penilaian Sikap Sosial & Spiritual</h1>
+                <h2 className="text-base font-bold text-amber-700 leading-tight">Penguatan Moderasi Beragama</h2>
+                <div className="flex justify-between mt-2 text-xs font-semibold border-t border-dashed border-amber-200 pt-1 px-2">
                    <span>Unit Kerja: {profile.unitKerja}</span>
                    <span>Periode: {periode}</span>
                 </div>
@@ -185,12 +195,12 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
              </div>
 
              {/* Footer Signature */}
-             <div className="mt-8 flex justify-end shrink-0 break-inside-avoid-page">
-                <div className="text-center w-64">
-                  <p>{profile.kota}, {tanggalLaporan}</p>
-                  <p className="mt-1 mb-2">Guru Mapel/Kelas,</p>
+             <div className="mt-4 flex justify-end shrink-0 break-inside-avoid-page">
+                <div className="text-center w-56">
+                  <p className="text-sm">{profile.kota}, {tanggalLaporan}</p>
+                  <p className="mt-0.5 mb-1 text-sm">Guru Mapel/Kelas,</p>
                   
-                  <div className="h-20 flex items-center justify-center my-2">
+                  <div className="h-16 flex items-center justify-center my-1">
                     <img 
                       src="https://drive.google.com/thumbnail?id=1gdxnC3M_VZLA--WQ5eEB66EJAO7dYm3o&sz=w500" 
                       alt="Tanda Tangan" 
@@ -198,8 +208,8 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                     />
                   </div>
 
-                  <p className="font-bold underline text-lg">{profile.nama}</p>
-                  <p className="text-md">NIP. {profile.nip || "-"}</p>
+                  <p className="font-bold underline text-base">{profile.nama}</p>
+                  <p className="text-sm">NIP. {profile.nip || "-"}</p>
                 </div>
               </div>
           </div>
