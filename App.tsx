@@ -43,7 +43,7 @@ const App: React.FC = () => {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
-  // States for Student Assessment
+  // States for Student Assessment (Hybrid Mode)
   const [studentNames, setStudentNames] = useState<string>('');
   const [kelas, setKelas] = useState<string>('');
 
@@ -97,21 +97,9 @@ const App: React.FC = () => {
     }
     if (!profile || !selectedCategoryId) return;
 
-    // Validation Logic
-    const isPureAssessment = selectedCategoryId === 'STUDENT_ASSESSMENT';
-    const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION';
-
-    // 1. Validation for Image
-    // Image is required for everything EXCEPT 'STUDENT_ASSESSMENT'
-    if (!isPureAssessment && !selectedImage) {
+    // 1. Validation for Image (Always Required)
+    if (!selectedImage) {
       setError("Mohon upload foto kegiatan terlebih dahulu.");
-      return;
-    }
-
-    // 2. Validation for Student Names
-    // Required ONLY for pure assessment. For Hybrid, it's optional but good to have.
-    if (isPureAssessment && !studentNames.trim()) {
-      setError("Mohon isi daftar nama siswa.");
       return;
     }
 
@@ -121,7 +109,7 @@ const App: React.FC = () => {
     try {
       const result: AnalysisResult = await analyzeImageWithGemini(
         EFFECTIVE_API_KEY, 
-        selectedImage, // Can be null for assessment
+        selectedImage,
         selectedCategoryId,
         userNote,
         studentNames,
@@ -281,11 +269,7 @@ const App: React.FC = () => {
   const headerColor = currentCategory?.theme.headerColor || 'bg-teal-700';
   
   // Logic to determine what inputs to show
-  const isAssessmentOnly = selectedCategoryId === 'STUDENT_ASSESSMENT';
   const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION';
-  
-  const showImageUpload = !isAssessmentOnly;
-  const showStudentInput = isAssessmentOnly || isHybridMod;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
@@ -341,56 +325,52 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* --- IMAGE UPLOAD SECTION (For All except Assessment Only) --- */}
-          {showImageUpload && (
-            <div 
-              onClick={() => !isAnalyzing && fileInputRef.current?.click()}
-              className={`
-                relative group cursor-pointer rounded-3xl border-2 border-dashed transition-all duration-300 overflow-hidden aspect-video flex flex-col items-center justify-center text-center p-6
-                ${selectedImage ? 'border-transparent bg-slate-50' : 'border-slate-300 hover:border-current hover:bg-slate-50'}
-                ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}
-                ${currentCategory?.theme.accent || 'text-teal-600'}
-              `}
-            >
-              {selectedImage ? (
-                <>
-                  <img src={selectedImage} alt="Preview" className="absolute inset-0 w-full h-full object-contain z-0 bg-black/5" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 text-white font-medium">
-                    Ganti Foto
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className={`p-4 rounded-full mb-3 group-hover:scale-110 transition-transform ${currentCategory?.theme.secondary || 'bg-teal-50'}`}>
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                  </div>
-                  <h3 className="font-bold text-slate-700 text-lg">Upload Foto</h3>
-                  <p className="text-sm text-slate-400">Ambil foto kegiatan</p>
-                </>
-              )}
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                onChange={handleFileChange} 
-                accept="image/*" 
-                className="hidden" 
-                disabled={isAnalyzing}
-              />
-            </div>
-          )}
+          {/* --- IMAGE UPLOAD SECTION (Required for All) --- */}
+          <div 
+            onClick={() => !isAnalyzing && fileInputRef.current?.click()}
+            className={`
+              relative group cursor-pointer rounded-3xl border-2 border-dashed transition-all duration-300 overflow-hidden aspect-video flex flex-col items-center justify-center text-center p-6
+              ${selectedImage ? 'border-transparent bg-slate-50' : 'border-slate-300 hover:border-current hover:bg-slate-50'}
+              ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}
+              ${currentCategory?.theme.accent || 'text-teal-600'}
+            `}
+          >
+            {selectedImage ? (
+              <>
+                <img src={selectedImage} alt="Preview" className="absolute inset-0 w-full h-full object-contain z-0 bg-black/5" />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 text-white font-medium">
+                  Ganti Foto
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={`p-4 rounded-full mb-3 group-hover:scale-110 transition-transform ${currentCategory?.theme.secondary || 'bg-teal-50'}`}>
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+                <h3 className="font-bold text-slate-700 text-lg">Upload Foto (Wajib)</h3>
+                <p className="text-sm text-slate-400">Ambil foto kegiatan</p>
+              </>
+            )}
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleFileChange} 
+              accept="image/*" 
+              className="hidden" 
+              disabled={isAnalyzing}
+            />
+          </div>
 
-          {/* --- STUDENT INPUT SECTION (For Assessment Only OR Religious Moderation) --- */}
-          {showStudentInput && (
+          {/* --- STUDENT INPUT SECTION (Religious Moderation Only) --- */}
+          {isHybridMod && (
             <div className="flex flex-col gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-               {isHybridMod && (
-                 <div className="flex items-center gap-2 text-xs font-semibold text-amber-700 mb-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>Opsional: Isi data siswa untuk generate tabel nilai otomatis.</span>
-                 </div>
-               )}
+               <div className="flex items-center gap-2 text-xs font-semibold text-amber-700 mb-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  <span>Opsional: Isi data siswa untuk generate tabel penilaian otomatis.</span>
+               </div>
               <div>
                 <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">
-                  Daftar Nama Siswa {isHybridMod && '(Opsional)'}
+                  Daftar Nama Siswa (Opsional)
                 </label>
                 <textarea
                   value={studentNames}
@@ -401,7 +381,7 @@ const App: React.FC = () => {
                 />
               </div>
               <div>
-                 <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">Kelas / Rombel {isHybridMod && '(Opsional)'}</label>
+                 <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">Kelas / Rombel (Opsional)</label>
                  <input
                   type="text"
                   value={kelas}
@@ -417,21 +397,19 @@ const App: React.FC = () => {
           {/* --- USER NOTE SECTION --- */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-              {isAssessmentOnly ? 'Materi / Bab Pembelajaran (Opsional)' : 'Keterangan / Judul Spesifik (Opsional)'}
+              Keterangan / Judul Spesifik (Opsional)
             </label>
             <input
               type="text"
               value={userNote}
               onChange={(e) => setUserNote(e.target.value)}
-              placeholder={isAssessmentOnly ? "Contoh: Toleransi Antar Umat" : "Contoh: Kegiatan Diskusi Kelompok"}
+              placeholder="Contoh: Kegiatan Diskusi Kelompok"
               className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-current focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50 placeholder-slate-400"
               style={{ color: 'inherit' }}
               disabled={isAnalyzing}
             />
             <p className="text-xs text-slate-400">
-              {isAssessmentOnly 
-                ? 'AI akan memilih prinsip moderasi yang relevan dengan materi ini.' 
-                : 'Bantu AI mengenali kegiatan dengan memberikan judul atau deskripsi singkat.'}
+              Bantu AI mengenali kegiatan dengan memberikan judul atau deskripsi singkat.
             </p>
           </div>
 

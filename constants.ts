@@ -82,63 +82,38 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       "Deklarasi Sekolah/Madrasah Ramah Anak",
       "Penciptaan lingkungan kelas yang inklusif dan aman",
       "Pengawasan kantin sehat dan higienis",
-      "Pemanfaatan taman sekolah untuk pembelajaran menyenangkan",
-      "Kampanye disiplin positif tanpa kekerasan",
-      "Kegiatan permainan tradisional saat istirahat",
-      "Pemantauan fasilitas sanitasi yang layak anak"
+      "Pemanfaatan taman sekolah untuk pembelajaran",
+      "Pelaksanaan kegiatan permainan tradisional",
+      "Penyediaan fasilitas yang aksesibel bagi siswa inklusi",
+      "Kampanye sekolah sehat dan bebas asap rokok"
     ]
   },
   {
     id: 'RELIGIOUS_MODERATION',
     title: 'Moderasi Beragama',
-    description: 'Penilaian dan penguatan moderasi beragama bagi siswa.',
-    icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3',
-    coverTitle: 'Laporan Penguatan\nModerasi Beragama',
+    description: 'Penguatan nilai toleransi, kebangsaan, dan moderasi beragama.',
+    icon: 'M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.2-2.848.578-4.136m1.838 1.58A6.002 6.002 0 0117.03 14',
+    coverTitle: 'Laporan Pelaksanaan\nPenguatan Moderasi Beragama',
     theme: {
       primary: 'text-emerald-800',
       secondary: 'bg-emerald-50',
       accent: 'text-emerald-600',
       bgGradient: 'from-emerald-50 to-white',
       headerColor: 'bg-emerald-700',
-      // Pattern: Geometric Star/Diamond
+      // Pattern: Geometric Islamic Star
       patternPath: 'M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z'
     },
     rhkList: [
-      "Penanaman nilai toleransi (Tasamuh) dalam diskusi kelas",
-      "Peringatan hari besar keagamaan secara moderat",
-      "Pembiasaan sikap adil dan seimbang (Tawazun)",
-      "Kegiatan bakti sosial lintas golongan",
-      "Dialog kebangsaan dan cinta tanah air (Hubbul Wathon)",
-      "Penilaian sikap menghargai perbedaan pendapat",
-      "Kampanye anti-radikalisme dan kekerasan",
-      "Penguatan nilai musyawarah (Syura) dalam pemilihan ketua",
-      "Doa bersama untuk keselamatan bangsa",
-      "Integrasi nilai moderasi dalam materi pelajaran"
-    ]
-  },
-  {
-    id: 'STUDENT_ASSESSMENT',
-    title: 'Penilaian Moderasi Siswa',
-    description: 'Input nama siswa dan generate tabel nilai sikap moderasi beragama otomatis.',
-    icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
-    coverTitle: 'Jurnal Penilaian Sikap\nPenguatan Moderasi Beragama',
-    theme: {
-      primary: 'text-amber-800',
-      secondary: 'bg-amber-50',
-      accent: 'text-amber-600',
-      bgGradient: 'from-amber-50 to-white',
-      headerColor: 'bg-amber-600',
-      // Pattern: Scales / Balance / Checklist
-      patternPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
-    },
-    rhkList: [
-      "Penilaian Sikap Toleransi (Tasamuh)",
-      "Penilaian Sikap Adil & Seimbang (Tawazun)",
-      "Penilaian Sikap Cinta Tanah Air (Hubbul Wathon)",
-      "Penilaian Sikap Musyawarah (Syura)",
-      "Penilaian Sikap Anti-Kekerasan (La' Unf)",
-      "Penilaian Sikap Menghargai Tradisi (Urf)",
-      "Penilaian Sikap Pelopor Kebaikan (Ishlah)"
+      "Melaksanakan kegiatan peringatan hari besar keagamaan",
+      "Menanamkan nilai toleransi (Tasamuh) dalam pembelajaran",
+      "Melaksanakan pembiasaan sholat berjamaah/ibadah bersama",
+      "Kegiatan bakti sosial lintas agama atau kemasyarakatan",
+      "Diskusi kelas tentang keberagaman dan kebangsaan",
+      "Pencegahan radikalisme dan ekstremisme di sekolah",
+      "Kampanye cinta tanah air (Hubbul Wathon)",
+      "Penerapan prinsip keadilan (I'tidal) dalam interaksi siswa",
+      "Kegiatan gotong royong membersihkan lingkungan ibadah",
+      "Penguatan profil pelajar Rahmatan lil Alamin"
     ]
   }
 ];

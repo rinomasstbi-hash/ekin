@@ -34,7 +34,7 @@ const handleGeminiError = (error: any, contextPrefix: string): never => {
 
 export const analyzeImageWithGemini = async (
   apiKey: string,
-  base64Image: string | null, // Made nullable
+  base64Image: string | null,
   categoryId: CategoryId,
   userNote?: string, // Used as 'Materi/Bab' for assessment
   studentNames?: string, // New param for list of students
@@ -49,77 +49,8 @@ export const analyzeImageWithGemini = async (
 
   const rhkListString = selectedCategory.rhkList.join("\n- ");
 
-  // --- BRANCH 1: STUDENT ASSESSMENT ONLY (TEXT ONLY) ---
-  if (categoryId === 'STUDENT_ASSESSMENT') {
-    if (!studentNames) throw new Error("Daftar nama siswa diperlukan.");
-    
-    const prompt = `
-      Saya butuh tabel penilaian sikap moderasi beragama siswa.
-      Daftar Nama Siswa: 
-      ${studentNames}
-
-      Konteks:
-      - Kelas: ${kelas || 'Umum'}
-      - Materi/Bab Pembelajaran: ${userNote || 'Materi Umum Moderasi Beragama'}
-      
-      Tugas:
-      1. Pilih SATU Prinsip Moderasi Beragama yang paling relevan dengan materi "${userNote}" dari daftar berikut: Tasamuh (Toleransi), Tawazun (Seimbang), I'tidal (Lurus/Adil), Hubbul Wathon (Cinta Tanah Air), Syura (Musyawarah), Islah (Perbaikan), Qudwah (Keteladanan), Muwathonah (Kewarganegaraan).
-      2. Set 'judul_terpilih' menjadi "Penilaian Sikap [Prinsip yang dipilih]".
-      3. Set 'caption' menjadi deskripsi singkat materi dalam 1 kalimat (misal: "Penilaian sikap pada materi [Materi] di kelas [Kelas]").
-      4. Untuk SETIAP nama siswa, berikan nilai predikat secara ACAK namun realistis (mayoritas B atau SB, sedikit C atau K). Pilihan: SB (Sangat Baik), B (Baik), C (Cukup), K (Kurang).
-      5. Berikan deskripsi singkat untuk setiap nilai (misal: SB = "Sangat konsisten menunjukkan sikap...", K = "Perlu bimbingan dalam...").
-      
-      Output JSON only.
-    `;
-
-    try {
-       const response = await ai.models.generateContent({
-        model: model,
-        contents: {
-          parts: [{ text: prompt }]
-        },
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              judul_terpilih: { type: Type.STRING },
-              jenis_kegiatan: { type: Type.STRING, enum: ["Penilaian Pembelajaran"] },
-              caption: { type: Type.STRING },
-              prinsipModerasi: { type: Type.STRING },
-              studentGrades: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    nama: { type: Type.STRING },
-                    predikat: { type: Type.STRING, enum: ["SB", "B", "C", "K"] },
-                    deskripsi: { type: Type.STRING }
-                  },
-                  required: ["nama", "predikat", "deskripsi"]
-                }
-              },
-              sections: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: {title: {type: Type.STRING}, type: {type: Type.STRING}, content: {type: Type.ARRAY, items: {type: Type.STRING}}} } } // Empty array holder
-            },
-            required: ["judul_terpilih", "caption", "studentGrades", "prinsipModerasi"]
-          }
-        }
-      });
-      
-      const text = response.text;
-      if (!text) throw new Error("No response from AI");
-      const result = JSON.parse(text) as AnalysisResult;
-      // Manually set empty sections if AI omits it
-      if(!result.sections) result.sections = [];
-      return result;
-
-    } catch (error: any) {
-      handleGeminiError(error, "Gagal membuat penilaian siswa");
-    }
-  }
-
-  // --- BRANCH 2: IMAGE ANALYSIS + OPTIONAL HYBRID (RELIGIOUS_MODERATION) ---
-  if (!base64Image) throw new Error("Gambar diperlukan untuk kategori ini.");
+  // --- IMAGE ANALYSIS (REQUIRED) ---
+  if (!base64Image) throw new Error("Gambar diperlukan untuk analisis.");
   
   const cleanBase64 = base64Image.replace(/^data:image\/(png|jpg|jpeg|webp);base64,/, "");
 

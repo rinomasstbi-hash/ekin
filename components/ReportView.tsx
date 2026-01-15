@@ -167,73 +167,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
     );
   };
 
-  // IF CATEGORY IS STUDENT ASSESSMENT, RENDER SPECIAL VIEW (SINGLE PAGE PREFERRED)
-  if (categoryId === 'STUDENT_ASSESSMENT') {
-     return (
-       <div className="flex flex-col items-center w-full bg-gray-100 min-h-screen p-4 sm:p-8 print:p-0 print:bg-white print:block">
-          {/* Floating Action Bar (Hidden when printing) */}
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex gap-4 bg-white px-6 py-3 rounded-full shadow-xl border border-gray-200 z-50 print:hidden transition-transform hover:-translate-y-1">
-            <button
-              onClick={() => window.print()}
-              className="flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-800"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-              Cetak PDF
-            </button>
-            <div className="w-px bg-gray-300"></div>
-            <button
-              onClick={onReset}
-              className="flex items-center gap-2 text-red-600 font-semibold hover:text-red-800"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-              Buat Baru
-            </button>
-          </div>
-
-          {/* 
-            KEY CHANGE: Padding reduced to 10mm (p-[10mm]) 
-            to allow more content on one page. 
-          */}
-          <div className={`sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[10mm] relative mx-auto print:mt-0 flex flex-col`}>
-             {/* Header Assessment: Reduced margins */}
-             <div className="text-center border-b-4 border-double border-amber-600 pb-1 mb-2">
-                <h1 className="text-base font-bold uppercase text-gray-900 tracking-wide leading-tight">Jurnal Penilaian Sikap Sosial & Spiritual</h1>
-                <h2 className="text-sm font-bold text-amber-700 leading-tight">Penguatan Moderasi Beragama</h2>
-                <div className="flex justify-between mt-1 text-[10px] font-semibold border-t border-dashed border-amber-200 pt-1 px-2">
-                   <span>Unit Kerja: {profile.unitKerja}</span>
-                   <span>Periode: {periode}</span>
-                </div>
-             </div>
-
-             {/* Content: Table */}
-             <div className="flex-1">
-                {renderAssessmentTable()}
-             </div>
-
-             {/* Footer Signature: Reduced margins */}
-             <div className="mt-2 flex justify-end shrink-0 break-inside-avoid-page">
-                <div className="text-center w-48">
-                  <p className="text-xs">{profile.kota}, {tanggalLaporan}</p>
-                  <p className="mt-0.5 mb-0 text-xs">Guru Mapel/Kelas,</p>
-                  
-                  <div className="h-14 flex items-center justify-center my-0.5">
-                    <img 
-                      src="https://drive.google.com/thumbnail?id=1gdxnC3M_VZLA--WQ5eEB66EJAO7dYm3o&sz=w500" 
-                      alt="Tanda Tangan" 
-                      className="h-full object-contain mix-blend-multiply" 
-                    />
-                  </div>
-
-                  <p className="font-bold underline text-sm">{profile.nama}</p>
-                  <p className="text-xs">NIP. {profile.nip || "-"}</p>
-                </div>
-              </div>
-          </div>
-       </div>
-     );
-  }
-
-  // --- STANDARD REPORT VIEW (FOR OTHER CATEGORIES) ---
+  // --- STANDARD REPORT VIEW (FOR ALL CATEGORIES) ---
   return (
     // Wrapper print settings
     <div className="flex flex-col items-center w-full bg-gray-100 min-h-screen p-4 sm:p-8 print:p-0 print:bg-white print:block">
