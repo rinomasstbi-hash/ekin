@@ -3,10 +3,10 @@ import { RHKCategory } from "./types";
 export const RHK_CATEGORIES: RHKCategory[] = [
   {
     id: 'TEACHING',
-    title: 'Tugas Guru & Pembelajaran',
-    description: 'Laporan aktivitas pembelajaran kelas, tugas tambahan, dan pengembangan diri.',
+    title: 'Penguatan Pendidikan Karakter',
+    description: 'Laporan pembiasaan karakter, kedisiplinan, dan budaya positif sekolah.',
     icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
-    coverTitle: 'Laporan Pelaksanaan\nTugas Guru & Pembelajaran',
+    coverTitle: 'Laporan Pelaksanaan\nPenguatan Pendidikan Karakter',
     theme: {
       primary: 'text-cyan-800',
       secondary: 'bg-cyan-50',
@@ -17,19 +17,18 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       patternPath: 'M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm0-14a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z'
     },
     rhkList: [
-      "Melaksanakan proses pembelajaran di dalam kelas",
-      "Melaksanakan kegiatan praktik di laboratorium/bengkel",
-      "Menjadi Wali Kelas",
-      "Menjadi Guru Piket Harian",
-      "Menjadi Pembina Ekstrakurikuler",
-      "Mengikuti kegiatan KKG/MGMP",
-      "Mengikuti Seminar/Webinar Pendidikan",
-      "Menyusun Perangkat Pembelajaran (RPP/Modul Ajar)",
-      "Melaksanakan Remedial dan Pengayaan",
-      "Melakukan Penilaian Hasil Belajar Siswa",
-      "Melaksanakan Tugas Tambahan Wakil Kepala Sekolah",
-      "Melaksanakan Rapat Dinas Sekolah",
-      "Menjadi Pengawas Ujian Sekolah"
+      "Pelaksanaan Upacara Bendera / Apel Pagi",
+      "Pembiasaan 5S (Senyum, Salam, Sapa, Sopan, Santun)",
+      "Kegiatan Gotong Royong / Jumat Bersih",
+      "Pelaksanaan Sholat Dhuha / Ibadah Berjamaah",
+      "Penerapan Budaya Antri dan Disiplin",
+      "Kegiatan Literasi Sekolah",
+      "Pembinaan Wali Kelas terhadap Siswa",
+      "Kegiatan Kepramukaan",
+      "Peringatan Hari Besar Nasional",
+      "Kampanye Kebersihan dan Lingkungan Hidup (Adiwiyata)",
+      "Penyelesaian Masalah Siswa (Restitusi)",
+      "Kegiatan Sosial / Infaq Jumat"
     ]
   },
   {

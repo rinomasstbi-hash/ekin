@@ -268,8 +268,9 @@ const App: React.FC = () => {
   // Default fallback if not found
   const headerColor = currentCategory?.theme.headerColor || 'bg-teal-700';
   
-  // Logic to determine what inputs to show
-  const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION';
+  // Logic to determine what inputs to show. 
+  // Now includes TEACHING (Character Education) and RELIGIOUS_MODERATION.
+  const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION' || selectedCategoryId === 'TEACHING';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
@@ -361,7 +362,7 @@ const App: React.FC = () => {
             />
           </div>
 
-          {/* --- STUDENT INPUT SECTION (Religious Moderation Only) --- */}
+          {/* --- STUDENT INPUT SECTION (Religious Moderation & Character Education) --- */}
           {isHybridMod && (
             <div className="flex flex-col gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                <div className="flex items-center gap-2 text-xs font-semibold text-amber-700 mb-1">

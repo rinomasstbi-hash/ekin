@@ -81,25 +81,30 @@ export const analyzeImageWithGemini = async (
       2. Title: "Penguatan Nilai Moderasi" (Type: paragraph) -> Narasi penanaman nilai yang terjadi.
       3. Title: "Indikator Sikap Moderat" (Type: list) -> Poin sikap yang muncul dalam kegiatan.
     `;
-
-    // HYBRID LOGIC: If student names are provided, ask to generate grades too.
-    if (studentNames) {
-      additionalInstruction = `
-        TUGAS TAMBAHAN (Wajib karena ada daftar siswa):
-        1. Analisis visual foto untuk menentukan SATU Prinsip Moderasi Beragama yang paling dominan/relevan (Contoh: Tasamuh, Tawazun, Hubbul Wathon, dll). Isi ke field 'prinsipModerasi'.
-        2. Gunakan daftar nama siswa berikut:
-           ${studentNames}
-        3. Buat objek 'studentGrades'. Untuk setiap siswa, berikan nilai (SB/B/C/K) dan deskripsi sikap yang relevan dengan prinsip moderasi yang kamu temukan di foto.
-        4. Field 'kelas' diisi dengan: "${kelas || 'Umum'}".
-      `;
-    }
-  } else {
-    // TEACHING
+  } else if (categoryId === 'TEACHING') {
+    // This is now CHARACTER EDUCATION
     structureInstruction = `
       Buat struktur laporan dengan sections berikut:
-      1. Title: "Latar Belakang" (Type: paragraph) -> Alasan pedagogis kegiatan.
-      2. Title: "Deskripsi Kegiatan" (Type: paragraph) -> Jalannya pembelajaran.
-      3. Title: "Nilai Karakter (Profil Pelajar)" (Type: list) -> Nilai karakter yang dikuatkan.
+      1. Title: "Nilai Karakter & Pembiasaan" (Type: paragraph) -> Jelaskan nilai karakter utama (Jujur, Disiplin, Gotong Royong, dll) yang dibangun dalam kegiatan ini.
+      2. Title: "Deskripsi Pelaksanaan" (Type: paragraph) -> Gambarkan bagaimana proses penanaman karakter dilakukan.
+      3. Title: "Refleksi & Dampak" (Type: list) -> Poin perubahan perilaku positif yang diharapkan/terlihat pada siswa.
+    `;
+  }
+
+  // HYBRID LOGIC: If student names are provided, ask to generate grades.
+  // Applies to both Religious Moderation and Teaching (Character Education)
+  if (studentNames && (categoryId === 'RELIGIOUS_MODERATION' || categoryId === 'TEACHING')) {
+    const focusValue = categoryId === 'RELIGIOUS_MODERATION' 
+        ? "Prinsip Moderasi Beragama (Tasamuh, Tawazun, dll)" 
+        : "Nilai Karakter Utama (Disiplin, Tanggung Jawab, Integritas, dll)";
+
+    additionalInstruction = `
+      TUGAS TAMBAHAN (Wajib karena ada daftar siswa):
+      1. Analisis visual foto untuk menentukan SATU ${focusValue} yang paling dominan. Isi ke field 'prinsipModerasi'.
+      2. Gunakan daftar nama siswa berikut:
+         ${studentNames}
+      3. Buat objek 'studentGrades'. Untuk setiap siswa, berikan nilai (SB/B/C/K) dan deskripsi sikap yang relevan dengan nilai karakter/moderasi yang kamu temukan di foto.
+      4. Field 'kelas' diisi dengan: "${kelas || 'Umum'}".
     `;
   }
 
