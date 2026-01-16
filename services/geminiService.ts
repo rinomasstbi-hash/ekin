@@ -89,21 +89,38 @@ export const analyzeImageWithGemini = async (
       2. Title: "Deskripsi Pelaksanaan" (Type: paragraph) -> Gambarkan bagaimana proses penanaman karakter dilakukan.
       3. Title: "Refleksi & Dampak" (Type: list) -> Poin perubahan perilaku positif yang diharapkan/terlihat pada siswa.
     `;
+  } else if (categoryId === 'COMPETITION') {
+    structureInstruction = `
+      Buat struktur laporan dengan sections berikut:
+      1. Title: "Identitas Kompetisi" (Type: paragraph) -> Jelaskan Nama Lomba, Tingkat (Sekolah/Kab/Prov/Nasional), dan Penyelenggara berdasarkan sertifikat/foto.
+      2. Title: "Persiapan & Pelaksanaan" (Type: paragraph) -> Deskripsikan proses pembimbingan atau keikutsertaan dalam lomba tersebut.
+      3. Title: "Hasil & Prestasi" (Type: list) -> Poin capaian, penghargaan, atau pengalaman yang didapat.
+    `;
   }
 
   // HYBRID LOGIC: If student names are provided, ask to generate grades.
-  // Applies to both Religious Moderation and Teaching (Character Education)
-  if (studentNames && (categoryId === 'RELIGIOUS_MODERATION' || categoryId === 'TEACHING')) {
-    const focusValue = categoryId === 'RELIGIOUS_MODERATION' 
-        ? "Prinsip Moderasi Beragama (Tasamuh, Tawazun, dll)" 
-        : "Nilai Karakter Utama (Disiplin, Tanggung Jawab, Integritas, dll)";
+  // Applies to Religious Moderation, Teaching (Character Education), and Competition
+  if (studentNames && (categoryId === 'RELIGIOUS_MODERATION' || categoryId === 'TEACHING' || categoryId === 'COMPETITION')) {
+    
+    let focusValue = "";
+    let gradingInstruction = "";
+
+    if (categoryId === 'COMPETITION') {
+      focusValue = "Kategori/Cabang Lomba";
+      gradingInstruction = "Untuk 'predikat', gunakan kode berikut: 'SB' = Juara/Terbaik, 'B' = Finalis/Baik, 'C' = Peserta. Di 'deskripsi', tuliskan capaian spesifik (Juara 1, Harapan 2, Peserta Aktif, dll).";
+    } else {
+      focusValue = categoryId === 'RELIGIOUS_MODERATION' 
+          ? "Prinsip Moderasi Beragama (Tasamuh, Tawazun, dll)" 
+          : "Nilai Karakter Utama (Disiplin, Tanggung Jawab, Integritas, dll)";
+      gradingInstruction = "Untuk setiap siswa, berikan nilai (SB/B/C/K) dan deskripsi sikap yang relevan dengan nilai karakter/moderasi yang kamu temukan di foto.";
+    }
 
     additionalInstruction = `
       TUGAS TAMBAHAN (Wajib karena ada daftar siswa):
-      1. Analisis visual foto untuk menentukan SATU ${focusValue} yang paling dominan. Isi ke field 'prinsipModerasi'.
+      1. Analisis visual foto/sertifikat untuk menentukan SATU ${focusValue} yang paling dominan/relevan. Isi ke field 'prinsipModerasi'.
       2. Gunakan daftar nama siswa berikut:
          ${studentNames}
-      3. Buat objek 'studentGrades'. Untuk setiap siswa, berikan nilai (SB/B/C/K) dan deskripsi sikap yang relevan dengan nilai karakter/moderasi yang kamu temukan di foto.
+      3. Buat objek 'studentGrades'. ${gradingInstruction}
       4. Field 'kelas' diisi dengan: "${kelas || 'Umum'}".
     `;
   }

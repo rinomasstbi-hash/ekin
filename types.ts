@@ -27,7 +27,7 @@ export interface AnalysisResult {
   prinsipModerasi?: string; // Optional data
 }
 
-export type CategoryId = 'TEACHING' | 'DIGITAL' | 'CHILD_FRIENDLY' | 'RELIGIOUS_MODERATION';
+export type CategoryId = 'TEACHING' | 'DIGITAL' | 'CHILD_FRIENDLY' | 'RELIGIOUS_MODERATION' | 'COMPETITION';
 
 export interface ReportData {
   image: string | null; // Base64 or null for text-only reports

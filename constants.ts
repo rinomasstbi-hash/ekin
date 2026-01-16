@@ -35,7 +35,7 @@ export const RHK_CATEGORIES: RHKCategory[] = [
     id: 'DIGITAL',
     title: 'Teknologi Digital',
     description: 'Pembuatan dan pemanfaatan teknologi digital dalam pembelajaran.',
-    icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+    icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
     coverTitle: 'Laporan Pemanfaatan\nTeknologi Digital Pembelajaran',
     theme: {
       primary: 'text-indigo-800',
@@ -113,6 +113,32 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       "Penerapan prinsip keadilan (I'tidal) dalam interaksi siswa",
       "Kegiatan gotong royong membersihkan lingkungan ibadah",
       "Penguatan profil pelajar Rahmatan lil Alamin"
+    ]
+  },
+  {
+    id: 'COMPETITION',
+    title: 'Keikutsertaan Lomba',
+    description: 'Laporan keikutsertaan guru/siswa dalam kompetisi akademik/non-akademik.',
+    icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z',
+    coverTitle: 'Laporan Keikutsertaan\nKompetisi & Perlombaan',
+    theme: {
+      primary: 'text-violet-800',
+      secondary: 'bg-violet-50',
+      accent: 'text-violet-600',
+      bgGradient: 'from-violet-50 to-white',
+      headerColor: 'bg-violet-700',
+      // Pattern: Trophy / Star burst
+      patternPath: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'
+    },
+    rhkList: [
+      "Membimbing siswa mengikuti kompetisi (KSN/KSM/O2SN)",
+      "Menjadi peserta lomba/kompetisi guru inovatif",
+      "Menjadi Juri/Wasit dalam perlombaan tingkat sekolah/daerah",
+      "Mendampingi siswa dalam lomba kepramukaan",
+      "Mengikuti lomba karya tulis ilmiah guru",
+      "Melatih tim ekstrakurikuler untuk perlombaan",
+      "Menjadi panitia penyelenggara lomba di sekolah",
+      "Meraih prestasi/penghargaan dalam kompetisi pendidikan"
     ]
   }
 ];

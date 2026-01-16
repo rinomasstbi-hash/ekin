@@ -269,8 +269,8 @@ const App: React.FC = () => {
   const headerColor = currentCategory?.theme.headerColor || 'bg-teal-700';
   
   // Logic to determine what inputs to show. 
-  // Now includes TEACHING (Character Education) and RELIGIOUS_MODERATION.
-  const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION' || selectedCategoryId === 'TEACHING';
+  // Now includes TEACHING, RELIGIOUS_MODERATION, and COMPETITION.
+  const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION' || selectedCategoryId === 'TEACHING' || selectedCategoryId === 'COMPETITION';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
@@ -340,7 +340,7 @@ const App: React.FC = () => {
               <>
                 <img src={selectedImage} alt="Preview" className="absolute inset-0 w-full h-full object-contain z-0 bg-black/5" />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 text-white font-medium">
-                  Ganti Foto
+                  Ganti Foto / Sertifikat
                 </div>
               </>
             ) : (
@@ -348,8 +348,8 @@ const App: React.FC = () => {
                 <div className={`p-4 rounded-full mb-3 group-hover:scale-110 transition-transform ${currentCategory?.theme.secondary || 'bg-teal-50'}`}>
                   <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </div>
-                <h3 className="font-bold text-slate-700 text-lg">Upload Foto (Wajib)</h3>
-                <p className="text-sm text-slate-400">Ambil foto kegiatan</p>
+                <h3 className="font-bold text-slate-700 text-lg">Upload Foto / Sertifikat</h3>
+                <p className="text-sm text-slate-400">Bukti kegiatan atau sertifikat lomba</p>
               </>
             )}
             <input 
@@ -362,21 +362,21 @@ const App: React.FC = () => {
             />
           </div>
 
-          {/* --- STUDENT INPUT SECTION (Religious Moderation & Character Education) --- */}
+          {/* --- STUDENT INPUT SECTION (Religious Moderation & Character Education & Competition) --- */}
           {isHybridMod && (
             <div className="flex flex-col gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                <div className="flex items-center gap-2 text-xs font-semibold text-amber-700 mb-1">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                  <span>Opsional: Isi data siswa untuk generate tabel penilaian otomatis.</span>
+                  <span>Opsional: Isi data {selectedCategoryId === 'COMPETITION' ? 'peserta lomba' : 'siswa'} untuk generate tabel {selectedCategoryId === 'COMPETITION' ? 'prestasi/partisipasi' : 'penilaian'}.</span>
                </div>
               <div>
                 <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">
-                  Daftar Nama Siswa (Opsional)
+                  Daftar Nama {selectedCategoryId === 'COMPETITION' ? 'Peserta' : 'Siswa'} (Opsional)
                 </label>
                 <textarea
                   value={studentNames}
                   onChange={(e) => setStudentNames(e.target.value)}
-                  placeholder="Paste nama siswa dari Excel disini...&#10;Contoh:&#10;Ahmad Dahlan&#10;Siti Walidah"
+                  placeholder="Paste nama dari Excel disini...&#10;Contoh:&#10;Ahmad Dahlan&#10;Siti Walidah"
                   className="w-full h-32 px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:ring-0 outline-none transition-all text-slate-700 bg-white placeholder-slate-400 text-sm"
                   disabled={isAnalyzing}
                 />

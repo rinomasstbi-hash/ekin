@@ -67,6 +67,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                 categoryId === 'CHILD_FRIENDLY' ? 'text-teal-800' :
                 categoryId === 'RELIGIOUS_MODERATION' ? 'uppercase text-green-800 tracking-wide border-b-2 border-green-600 inline-block' :
                 categoryId === 'TEACHING' ? 'text-cyan-800 border-b border-cyan-200' :
+                categoryId === 'COMPETITION' ? 'text-violet-900 border-b border-violet-200 uppercase tracking-tight' :
                 'text-gray-900 border-b border-gray-300'
               }`}
             >
@@ -85,6 +86,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                 categoryId === 'CHILD_FRIENDLY' ? 'bg-white border-l-4 border-teal-400 pl-4 py-2' :
                 categoryId === 'RELIGIOUS_MODERATION' ? 'border-2 border-green-100 p-4 bg-green-50/30' :
                 categoryId === 'TEACHING' ? 'bg-cyan-50/50 p-3 rounded border-l-2 border-cyan-500' :
+                categoryId === 'COMPETITION' ? 'bg-violet-50 p-4 rounded-xl border border-violet-100' :
                 ''
               }`}>
                 <ul className={`text-base space-y-1 ${categoryId === 'RELIGIOUS_MODERATION' ? '' : 'list-disc pl-5'}`}>
@@ -125,10 +127,14 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
     const cellPaddingClass = isSuperDense ? 'py-[1px] px-1' : isVeryDense ? 'py-0.5 px-2' : isDense ? 'py-1 px-2' : 'py-2 px-4';
     const headerPaddingClass = isSuperDense ? 'py-1 px-1' : isVeryDense ? 'py-1 px-2' : 'py-2 px-4';
 
+    // Headers text based on category
+    const gradeHeader = categoryId === 'COMPETITION' ? 'Status' : 'Nilai';
+    const descHeader = categoryId === 'COMPETITION' ? 'Capaian / Keterangan' : 'Deskripsi Sikap';
+
     return (
       <div className="w-full">
          <div className="mb-1">
-            <h3 className="text-center font-bold text-sm uppercase mb-0 leading-tight">{analysis.prinsipModerasi || 'Nilai Sikap'}</h3>
+            <h3 className="text-center font-bold text-sm uppercase mb-0 leading-tight">{analysis.prinsipModerasi || (categoryId === 'COMPETITION' ? 'Daftar Peserta & Prestasi' : 'Nilai Sikap')}</h3>
             <p className="text-center text-[10px] text-gray-600 italic">"{analysis.caption}"</p>
          </div>
 
@@ -137,9 +143,9 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
              <thead className={`bg-amber-100 ${rowFontSize}`}>
                <tr>
                  <th className={`${headerPaddingClass} border-b border-r border-gray-300 w-8 text-center`}>No</th>
-                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 text-left`}>Nama Siswa</th>
-                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 text-center w-12`}>Nilai</th>
-                 <th className={`${headerPaddingClass} border-b border-gray-300 text-left`}>Deskripsi Sikap</th>
+                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 text-left`}>Nama Siswa/Peserta</th>
+                 <th className={`${headerPaddingClass} border-b border-r border-gray-300 text-center w-16`}>{gradeHeader}</th>
+                 <th className={`${headerPaddingClass} border-b border-gray-300 text-left`}>{descHeader}</th>
                </tr>
              </thead>
              <tbody className={rowFontSize}>
@@ -151,7 +157,9 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                       ${student.predikat === 'SB' ? 'text-blue-600' : 
                         student.predikat === 'B' ? 'text-green-600' : 
                         student.predikat === 'C' ? 'text-amber-600' : 'text-red-600'}`}>
-                     {student.predikat}
+                     {categoryId === 'COMPETITION' 
+                        ? (student.predikat === 'SB' ? 'JUARA' : student.predikat === 'B' ? 'FINALIS' : 'PESERTA')
+                        : student.predikat}
                    </td>
                    <td className={`${cellPaddingClass} border-b border-gray-200 text-gray-600 italic ${descFontSize}`}>
                      {student.deskripsi}
@@ -162,9 +170,11 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
            </table>
          </div>
          
-         <div className="mt-1 text-[9px] text-gray-500">
-           <p><span className="font-bold">Ket:</span> SB=Sangat Baik, B=Baik, C=Cukup, K=Kurang</p>
-         </div>
+         {categoryId !== 'COMPETITION' && (
+           <div className="mt-1 text-[9px] text-gray-500">
+             <p><span className="font-bold">Ket:</span> SB=Sangat Baik, B=Baik, C=Cukup, K=Kurang</p>
+           </div>
+         )}
       </div>
     );
   };
@@ -324,11 +334,15 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
          <div className={`sheet bg-white shadow-2xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[10mm] relative mx-auto print:mt-0 flex flex-col`}>
              {/* Header Assessment: Reduced margins */}
              <div className="text-center border-b-4 border-double border-amber-600 pb-1 mb-2">
-                <h1 className="text-base font-bold uppercase text-gray-900 tracking-wide leading-tight">Jurnal Penilaian Sikap Sosial & Spiritual</h1>
+                <h1 className="text-base font-bold uppercase text-gray-900 tracking-wide leading-tight">
+                  {categoryId === 'COMPETITION' ? 'Lampiran Data Prestasi & Partisipasi' : 'Jurnal Penilaian Sikap Sosial & Spiritual'}
+                </h1>
                 
                 {/* Dynamic Sub-header based on Category */}
                 <h2 className="text-sm font-bold text-amber-700 leading-tight">
-                    {categoryId === 'RELIGIOUS_MODERATION' ? 'Penguatan Moderasi Beragama' : 'Penguatan Pendidikan Karakter'}
+                    {categoryId === 'RELIGIOUS_MODERATION' ? 'Penguatan Moderasi Beragama' : 
+                     categoryId === 'TEACHING' ? 'Penguatan Pendidikan Karakter' : 
+                     categoryId === 'COMPETITION' ? 'Rekapitulasi Keikutsertaan Lomba' : ''}
                 </h2>
 
                 <div className="flex justify-between mt-1 text-[10px] font-semibold border-t border-dashed border-amber-200 pt-1 px-2">
