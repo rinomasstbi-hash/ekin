@@ -68,6 +68,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                 categoryId === 'RELIGIOUS_MODERATION' ? 'uppercase text-green-800 tracking-wide border-b-2 border-green-600 inline-block' :
                 categoryId === 'TEACHING' ? 'text-cyan-800 border-b border-cyan-200' :
                 categoryId === 'COMPETITION' ? 'text-violet-900 border-b border-violet-200 uppercase tracking-tight' :
+                categoryId === 'CUSTOM' ? 'text-amber-900 border-b border-amber-200' :
                 'text-gray-900 border-b border-gray-300'
               }`}
             >
@@ -87,6 +88,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                 categoryId === 'RELIGIOUS_MODERATION' ? 'border-2 border-green-100 p-4 bg-green-50/30' :
                 categoryId === 'TEACHING' ? 'bg-cyan-50/50 p-3 rounded border-l-2 border-cyan-500' :
                 categoryId === 'COMPETITION' ? 'bg-violet-50 p-4 rounded-xl border border-violet-100' :
+                categoryId === 'CUSTOM' ? 'bg-amber-50 p-3 rounded border-l-2 border-amber-500' :
                 ''
               }`}>
                 <ul className={`text-base space-y-1 ${categoryId === 'RELIGIOUS_MODERATION' ? '' : 'list-disc pl-5'}`}>
@@ -129,12 +131,12 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
 
     // Headers text based on category
     const gradeHeader = categoryId === 'COMPETITION' ? 'Status' : 'Nilai';
-    const descHeader = categoryId === 'COMPETITION' ? 'Capaian / Keterangan' : 'Deskripsi Sikap';
+    const descHeader = categoryId === 'COMPETITION' ? 'Capaian / Keterangan' : categoryId === 'CUSTOM' ? 'Keterangan' : 'Deskripsi Sikap';
 
     return (
       <div className="w-full">
          <div className="mb-1">
-            <h3 className="text-center font-bold text-sm uppercase mb-0 leading-tight">{analysis.prinsipModerasi || (categoryId === 'COMPETITION' ? 'Daftar Peserta & Prestasi' : 'Nilai Sikap')}</h3>
+            <h3 className="text-center font-bold text-sm uppercase mb-0 leading-tight">{analysis.prinsipModerasi || (categoryId === 'COMPETITION' ? 'Daftar Peserta & Prestasi' : categoryId === 'CUSTOM' ? 'Daftar Peserta & Keterangan' : 'Nilai Sikap')}</h3>
             <p className="text-center text-[10px] text-gray-600 italic">"{analysis.caption}"</p>
          </div>
 
@@ -335,14 +337,15 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
              {/* Header Assessment: Reduced margins */}
              <div className="text-center border-b-4 border-double border-amber-600 pb-1 mb-2">
                 <h1 className="text-base font-bold uppercase text-gray-900 tracking-wide leading-tight">
-                  {categoryId === 'COMPETITION' ? 'Lampiran Data Prestasi & Partisipasi' : 'Jurnal Penilaian Sikap Sosial & Spiritual'}
+                  {categoryId === 'COMPETITION' ? 'Lampiran Data Prestasi & Partisipasi' : categoryId === 'CUSTOM' ? 'Lampiran Data Keterlibatan' : 'Jurnal Penilaian Sikap Sosial & Spiritual'}
                 </h1>
                 
                 {/* Dynamic Sub-header based on Category */}
                 <h2 className="text-sm font-bold text-amber-700 leading-tight">
                     {categoryId === 'RELIGIOUS_MODERATION' ? 'Penguatan Moderasi Beragama' : 
                      categoryId === 'TEACHING' ? 'Penguatan Pendidikan Karakter' : 
-                     categoryId === 'COMPETITION' ? 'Rekapitulasi Keikutsertaan Lomba' : ''}
+                     categoryId === 'COMPETITION' ? 'Rekapitulasi Keikutsertaan Lomba' : 
+                     categoryId === 'CUSTOM' ? 'Rekapitulasi Kegiatan Kustom' : ''}
                 </h2>
 
                 <div className="flex justify-between mt-1 text-[10px] font-semibold border-t border-dashed border-amber-200 pt-1 px-2">

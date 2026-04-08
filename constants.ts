@@ -140,5 +140,23 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       "Menjadi panitia penyelenggara lomba di sekolah",
       "Meraih prestasi/penghargaan dalam kompetisi pendidikan"
     ]
+  },
+  {
+    id: 'CUSTOM',
+    title: 'Custom RHK',
+    description: 'Laporan kustom berdasarkan foto atau dokumen yang diunggah. AI akan menganalisis dan membuat laporan yang relevan.',
+    icon: 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z',
+    coverTitle: 'Laporan Pelaksanaan\nKegiatan Kustom',
+    theme: {
+      primary: 'text-amber-800',
+      secondary: 'bg-amber-50',
+      accent: 'text-amber-600',
+      bgGradient: 'from-amber-50 to-white',
+      headerColor: 'bg-amber-700',
+      patternPath: 'M12 2L2 22h20L12 2zm0 4l6 14H6l6-14z'
+    },
+    rhkList: [
+      "Laporan Kegiatan Kustom (Dianalisis oleh AI)"
+    ]
   }
 ];

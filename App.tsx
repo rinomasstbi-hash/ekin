@@ -269,8 +269,8 @@ const App: React.FC = () => {
   const headerColor = currentCategory?.theme.headerColor || 'bg-teal-700';
   
   // Logic to determine what inputs to show. 
-  // Now includes TEACHING, RELIGIOUS_MODERATION, and COMPETITION.
-  const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION' || selectedCategoryId === 'TEACHING' || selectedCategoryId === 'COMPETITION';
+  // Now includes TEACHING, RELIGIOUS_MODERATION, COMPETITION, and CUSTOM.
+  const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION' || selectedCategoryId === 'TEACHING' || selectedCategoryId === 'COMPETITION' || selectedCategoryId === 'CUSTOM';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
@@ -362,16 +362,16 @@ const App: React.FC = () => {
             />
           </div>
 
-          {/* --- STUDENT INPUT SECTION (Religious Moderation & Character Education & Competition) --- */}
+          {/* --- STUDENT INPUT SECTION (Religious Moderation & Character Education & Competition & Custom) --- */}
           {isHybridMod && (
             <div className="flex flex-col gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                <div className="flex items-center gap-2 text-xs font-semibold text-amber-700 mb-1">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                  <span>Opsional: Isi data {selectedCategoryId === 'COMPETITION' ? 'peserta lomba' : 'siswa'} untuk generate tabel {selectedCategoryId === 'COMPETITION' ? 'prestasi/partisipasi' : 'penilaian'}.</span>
+                  <span>Opsional: Isi data {selectedCategoryId === 'COMPETITION' || selectedCategoryId === 'CUSTOM' ? 'peserta' : 'siswa'} untuk generate tabel {selectedCategoryId === 'COMPETITION' ? 'prestasi/partisipasi' : selectedCategoryId === 'CUSTOM' ? 'keterlibatan/penilaian' : 'penilaian'}.</span>
                </div>
               <div>
                 <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">
-                  Daftar Nama {selectedCategoryId === 'COMPETITION' ? 'Peserta' : 'Siswa'} (Opsional)
+                  Daftar Nama {selectedCategoryId === 'COMPETITION' || selectedCategoryId === 'CUSTOM' ? 'Peserta' : 'Siswa'} (Opsional)
                 </label>
                 <textarea
                   value={studentNames}

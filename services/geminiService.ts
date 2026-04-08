@@ -96,11 +96,18 @@ export const analyzeImageWithGemini = async (
       2. Title: "Persiapan & Pelaksanaan" (Type: paragraph) -> Deskripsikan proses pembimbingan atau keikutsertaan dalam lomba tersebut.
       3. Title: "Hasil & Prestasi" (Type: list) -> Poin capaian, penghargaan, atau pengalaman yang didapat.
     `;
+  } else if (categoryId === 'CUSTOM') {
+    structureInstruction = `
+      Buat struktur laporan dengan sections berikut:
+      1. Title: "Konteks Kegiatan" (Type: paragraph) -> Deskripsikan secara umum apa yang terlihat pada foto/dokumen.
+      2. Title: "Rincian Pelaksanaan" (Type: paragraph) -> Jelaskan detail aktivitas, proses, atau informasi penting yang ada.
+      3. Title: "Hasil & Kesimpulan" (Type: list) -> Poin-poin hasil, dampak, atau kesimpulan dari kegiatan tersebut.
+    `;
   }
 
   // HYBRID LOGIC: If student names are provided, ask to generate grades.
-  // Applies to Religious Moderation, Teaching (Character Education), and Competition
-  if (studentNames && (categoryId === 'RELIGIOUS_MODERATION' || categoryId === 'TEACHING' || categoryId === 'COMPETITION')) {
+  // Applies to Religious Moderation, Teaching (Character Education), Competition, and Custom
+  if (studentNames && (categoryId === 'RELIGIOUS_MODERATION' || categoryId === 'TEACHING' || categoryId === 'COMPETITION' || categoryId === 'CUSTOM')) {
     
     let focusValue = "";
     let gradingInstruction = "";
@@ -108,6 +115,9 @@ export const analyzeImageWithGemini = async (
     if (categoryId === 'COMPETITION') {
       focusValue = "Kategori/Cabang Lomba";
       gradingInstruction = "Untuk 'predikat', gunakan kode berikut: 'SB' = Juara/Terbaik, 'B' = Finalis/Baik, 'C' = Peserta. Di 'deskripsi', tuliskan capaian spesifik (Juara 1, Harapan 2, Peserta Aktif, dll).";
+    } else if (categoryId === 'CUSTOM') {
+      focusValue = "Fokus Utama Kegiatan";
+      gradingInstruction = "Untuk setiap siswa, berikan nilai (SB/B/C/K) dan deskripsi capaian/keterlibatan yang relevan dengan kegiatan di foto.";
     } else {
       focusValue = categoryId === 'RELIGIOUS_MODERATION' 
           ? "Prinsip Moderasi Beragama (Tasamuh, Tawazun, dll)" 
