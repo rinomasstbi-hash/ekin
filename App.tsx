@@ -40,6 +40,7 @@ const App: React.FC = () => {
   });
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId | null>(null);
+  const [selectedRhkItem, setSelectedRhkItem] = useState<string>('');
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
@@ -113,7 +114,8 @@ const App: React.FC = () => {
         selectedCategoryId,
         userNote,
         studentNames,
-        kelas
+        kelas,
+        selectedRhkItem
       );
       const categoryConfig = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
       
@@ -159,6 +161,7 @@ const App: React.FC = () => {
     setUserNote(''); 
     setStudentNames('');
     setKelas('');
+    setSelectedRhkItem('');
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -169,6 +172,7 @@ const App: React.FC = () => {
     setUserNote('');
     setStudentNames('');
     setKelas('');
+    setSelectedRhkItem('');
     setError(null);
   };
 
@@ -413,6 +417,30 @@ const App: React.FC = () => {
               Bantu AI mengenali kegiatan dengan memberikan judul atau deskripsi singkat.
             </p>
           </div>
+
+          {/* --- RHK SELECTION SECTION --- */}
+          {currentCategory && currentCategory.rhkList.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+                Pilih Target RHK (Opsional)
+              </label>
+              <select
+                value={selectedRhkItem}
+                onChange={(e) => setSelectedRhkItem(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-current focus:ring-0 outline-none transition-all text-slate-700 bg-slate-50"
+                style={{ color: 'inherit' }}
+                disabled={isAnalyzing}
+              >
+                <option value="">-- Biarkan AI Memilih Otomatis --</option>
+                {currentCategory.rhkList.map((rhk, idx) => (
+                  <option key={idx} value={rhk}>{rhk}</option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-400">
+                Pilih spesifik RHK yang ingin dituju agar laporan lebih akurat.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-sm flex flex-col gap-3 animate-fade-in">

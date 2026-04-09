@@ -17,6 +17,8 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       patternPath: 'M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm0-14a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z'
     },
     rhkList: [
+      "[RHK 09] Jumlah program pembiasaan karakter harian/mingguan",
+      "[RHK 11] Jumlah kegiatan kepramukaan (perkemahan, bakti sosial, lomba)",
       "Pelaksanaan Upacara Bendera / Apel Pagi",
       "Pembiasaan 5S (Senyum, Salam, Sapa, Sopan, Santun)",
       "Kegiatan Gotong Royong / Jumat Bersih",
@@ -75,6 +77,7 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       patternPath: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'
     },
     rhkList: [
+      "[RHK 03] Tersedianya daftar satuan pendidikan yang memiliki potensi inklusif",
       "Penyambutan siswa dengan 5S (Senyum, Salam, Sapa, Sopan, Santun)",
       "Sosialisasi pencegahan perundungan (Anti-Bullying)",
       "Layanan konseling individu yang ramah anak",
@@ -103,6 +106,7 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       patternPath: 'M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z'
     },
     rhkList: [
+      "[RHK 18] Jumlah guru yang mengikuti pelatihan penguatan moderasi beragama",
       "Melaksanakan kegiatan peringatan hari besar keagamaan",
       "Menanamkan nilai toleransi (Tasamuh) dalam pembelajaran",
       "Melaksanakan pembiasaan sholat berjamaah/ibadah bersama",
@@ -131,6 +135,7 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       patternPath: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'
     },
     rhkList: [
+      "[RHK 11] Jumlah kegiatan kepramukaan (perkemahan, bakti sosial, lomba)",
       "Membimbing siswa mengikuti kompetisi (KSN/KSM/O2SN)",
       "Menjadi peserta lomba/kompetisi guru inovatif",
       "Menjadi Juri/Wasit dalam perlombaan tingkat sekolah/daerah",
@@ -156,10 +161,10 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       patternPath: 'M12 14l9-5-9-5-9 5 9 5z'
     },
     rhkList: [
-      "Mengikuti pelatihan berbasis literasi",
-      "Mengikuti pelatihan metode pengajaran bilingual",
-      "Mengikuti pelatihan penguatan moderasi beragama",
-      "Peningkatan Indeks Profesionalisme ASN",
+      "[RHK 06] Jumlah guru yang mengikuti pelatihan berbasis literasi",
+      "[RHK 15] Jumlah guru yang mengikuti pelatihan metode pengajaran bilingual",
+      "[RHK 18] Jumlah guru yang mengikuti pelatihan penguatan moderasi beragama",
+      "[RHK 21] Tersedianya Dokumen Peningkatan Indeks Profesionalisme ASN",
       "Sertifikat/Bimtek/Seminar Pendidikan"
     ]
   },
@@ -178,9 +183,9 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       patternPath: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
     },
     rhkList: [
-      "Menerapkan strategi pembelajaran numerasi",
-      "Penyusunan silabus dan RPP",
-      "Menyusun RPP memuat pendidikan karakter",
+      "[RHK 07] Jumlah guru yang menerapkan strategi pembelajaran numerasi",
+      "[RHK 12] Jumlah guru yang mengikuti pelatihan/penyusunan silabus dan RPP",
+      "[RHK 17] Persentase guru yang mampu menyusun RPP memuat pendidikan karakter",
       "Pembuatan Modul Ajar IPA/Mata Pelajaran Lain"
     ]
   },
@@ -199,9 +204,9 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       patternPath: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'
     },
     rhkList: [
-      "Program pengembangan bakat dan minat yang diselenggarakan",
-      "Database siswa madrasah yang memiliki bakat/minat",
-      "Database siswa berbakat/berprestasi pada berbagai bidang",
+      "[RHK 02] Jumlah program pengembangan bakat dan minat yang diselenggarakan",
+      "[RHK 10] Tersedianya database siswa madrasah yang memiliki bakat/minat",
+      "[RHK 16] Tersedianya database siswa berbakat/berprestasi pada berbagai bidang",
       "Pemetaan siswa berprestasi"
     ]
   },
@@ -220,12 +225,12 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       patternPath: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
     },
     rhkList: [
-      "Data daya tampung dan jumlah siswa existing (PPDB)",
-      "Menyelenggarakan forum RKT",
-      "Database satuan pendidikan termasuk status akreditasi",
-      "Dokumen satuan pendidikan yang menerima pendampingan (Supervisi)",
-      "Surat Keputusan (SK) Tim Pembangunan ZI",
-      "Data profil pegawai yang terekam di SIMPEG"
+      "[RHK 04] Tersedianya data daya tampung dan jumlah siswa existing (PPDB)",
+      "[RHK 08] Jumlah satuan pendidikan yang menyelenggarakan forum RKT",
+      "[RHK 13] Tersedianya database satuan pendidikan termasuk status akreditasi",
+      "[RHK 14] Jumlah dokumen satuan pendidikan yang menerima pendampingan (Supervisi)",
+      "[RHK 19] Tersedianya Surat Keputusan (SK) Tim Pembangunan ZI",
+      "[RHK 20] Tersedianya data profil pegawai yang terekam di SIMPEG"
     ]
   },
   {
@@ -243,8 +248,8 @@ export const RHK_CATEGORIES: RHKCategory[] = [
       patternPath: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z'
     },
     rhkList: [
-      "Kegiatan pembinaan pranikah",
-      "Pemeriksaan kesehatan rutin (UKS)",
+      "[RHK 01] Jumlah kegiatan pembinaan pranikah yang diselenggarakan",
+      "[RHK 05] Jumlah satuan pendidikan yang melaksanakan pemeriksaan kesehatan rutin (UKS)",
       "Kampanye kesehatan dan gizi siswa"
     ]
   },

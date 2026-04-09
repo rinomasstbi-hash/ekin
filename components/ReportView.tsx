@@ -246,7 +246,17 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
               {categoryLabel || "Laporan Kinerja Guru"}
             </h1>
             <h2 className={`text-xl font-serif font-bold uppercase px-4 mt-6 ${theme ? `text-${colorName}-700` : 'text-gray-700'}`}>
-              {analysis.judul_terpilih}
+              {(() => {
+                const rhkMatch = analysis.judul_terpilih.match(/\[(RHK \d+)\]/);
+                const rhkBadge = rhkMatch ? rhkMatch[1] : null;
+                const cleanTitle = analysis.judul_terpilih.replace(/\[RHK \d+\]\s*/, '');
+                return (
+                  <>
+                    {rhkBadge && <span className={`block text-sm mb-2 font-sans tracking-widest ${theme ? `text-${colorName}-500` : 'text-gray-500'}`}>{rhkBadge}</span>}
+                    {cleanTitle}
+                  </>
+                );
+              })()}
             </h2>
           </div>
 
@@ -303,7 +313,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
           
           {/* Header Internal */}
           <div className="border-b border-gray-300 pb-2 mb-6 text-right shrink-0">
-            <p className="text-xs text-gray-400 italic">Lampiran: {analysis.judul_terpilih}</p>
+            <p className="text-xs text-gray-400 italic">Lampiran: {analysis.judul_terpilih.replace(/\[RHK \d+\]\s*/, '')}</p>
           </div>
 
           {/* Section: Dokumentasi */}

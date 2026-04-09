@@ -38,7 +38,8 @@ export const analyzeImageWithGemini = async (
   categoryId: CategoryId,
   userNote?: string, // Used as 'Materi/Bab' for assessment
   studentNames?: string, // New param for list of students
-  kelas?: string // New param for class
+  kelas?: string, // New param for class
+  selectedRhkItem?: string // New param for specific RHK
 ): Promise<AnalysisResult> => {
   const ai = new GoogleGenAI({ apiKey });
   const model = "gemini-2.5-flash"; 
@@ -182,8 +183,7 @@ export const analyzeImageWithGemini = async (
     
     Tugas Utama:
     1. Identifikasi visual foto.
-    2. Pilih SATU Judul RHK yang paling cocok dari daftar:
-    ${rhkListString}
+    2. ${selectedRhkItem ? `Gunakan Judul RHK ini secara persis (termasuk kodenya jika ada): "${selectedRhkItem}"` : `Pilih SATU Judul RHK yang paling cocok dari daftar:\n${rhkListString}`}
     3. Tentukan jenis kegiatan (Intrakurikuler/Kokurikuler/Ekstrakurikuler).
     4. Isi field 'caption': Deskripsi singkat dan formal (1 kalimat) tentang foto.
     5. ${structureInstruction}
