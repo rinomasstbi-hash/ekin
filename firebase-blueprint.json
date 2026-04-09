@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Profile data for a teacher",
+      "type": "object",
+      "properties": {
+        "nama": { "type": "string", "description": "Full name and title" },
+        "nip": { "type": "string", "description": "NIP (optional)" },
+        "unitKerja": { "type": "string", "description": "School or unit" },
+        "kota": { "type": "string", "description": "City or regency" },
+        "mataPelajaran": { "type": "string", "description": "Subject taught" },
+        "tahunPelaporan": { "type": "string", "description": "Reporting year" },
+        "email": { "type": "string", "format": "email", "description": "User email" },
+        "role": { "type": "string", "enum": ["user", "admin"], "description": "User role" }
+      },
+      "required": ["nama", "unitKerja", "kota", "mataPelajaran", "tahunPelaporan", "email", "role"]
+    },
+    "Report": {
+      "title": "Report",
+      "description": "A generated RHK report",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "ID of the user who created the report" },
+        "categoryId": { "type": "string", "description": "Category ID of the report" },
+        "periode": { "type": "string", "description": "Quarter period" },
+        "tanggalLaporan": { "type": "string", "description": "Report date" },
+        "images": { 
+          "type": "array", 
+          "items": { "type": "string" },
+          "description": "Array of image URLs or base64 strings"
+        },
+        "analysis": { "type": "object", "description": "Generated analysis result" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["userId", "categoryId", "periode", "tanggalLaporan", "images", "analysis", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stores teacher profiles"
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/Report" },
+      "description": "Stores generated reports"
+    }
+  }
+}

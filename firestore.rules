@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId} (matches auth.uid)
+    // Fields:
+    //   - nama: string (required, < 100 chars)
+    //   - nip: string (optional, < 50 chars)
+    //   - unitKerja: string (required, < 100 chars)
+    //   - kota: string (required, < 100 chars)
+    //   - mataPelajaran: string (required, < 100 chars)
+    //   - tahunPelaporan: string (required, < 10 chars)
+    //   - email: string (required, valid email)
+    //   - role: string (required, 'user' or 'admin')
+    //
+    // Collection: reports
+    // Document ID: auto-generated
+    // Fields:
+    //   - userId: string (required, matches auth.uid)
+    //   - categoryId: string (required, < 50 chars)
+    //   - periode: string (required, < 50 chars)
+    //   - tanggalLaporan: string (required, < 50 chars)
+    //   - images: list of strings (required, max 10 items)
+    //   - analysis: map (required)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "rinomasstbi@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['nama', 'nip', 'unitKerja', 'kota', 'mataPelajaran', 'tahunPelaporan', 'email', 'role']) &&
+             data.nama is string && data.nama.size() > 0 && data.nama.size() < 100 &&
+             (!('nip' in data) || (data.nip is string && data.nip.size() < 50)) &&
+             data.unitKerja is string && data.unitKerja.size() > 0 && data.unitKerja.size() < 100 &&
+             data.kota is string && data.kota.size() > 0 && data.kota.size() < 100 &&
+             data.mataPelajaran is string && data.mataPelajaran.size() > 0 && data.mataPelajaran.size() < 100 &&
+             data.tahunPelaporan is string && data.tahunPelaporan.size() > 0 && data.tahunPelaporan.size() < 10 &&
+             data.email is string && isValidEmail(data.email) &&
+             data.role in ['user', 'admin'];
+    }
+
+    function isValidReport(data) {
+      return hasOnlyAllowedFields(['userId', 'categoryId', 'periode', 'tanggalLaporan', 'images', 'analysis', 'createdAt']) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.categoryId is string && data.categoryId.size() > 0 && data.categoryId.size() < 50 &&
+             data.periode is string && data.periode.size() > 0 && data.periode.size() < 50 &&
+             data.tanggalLaporan is string && data.tanggalLaporan.size() > 0 && data.tanggalLaporan.size() < 50 &&
+             data.images is list && data.images.size() <= 10 &&
+             data.analysis is map &&
+             data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+    
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
+                    ((isOwner(userId) && request.resource.data.role == 'user') || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
+                    ((isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /reports/{reportId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidReport(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidReport(request.resource.data) &&
+                    request.resource.data.userId == resource.data.userId &&
+                    request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isDocOwner() || isAdmin();
+    }
+  }
+}

@@ -12,6 +12,8 @@ export const ProfileForm: React.FC<Props> = ({ initialProfile, onSave }) => {
     nip: '',
     unitKerja: '',
     kota: '',
+    mataPelajaran: '',
+    tahunPelaporan: new Date().getFullYear().toString(),
   });
 
   useEffect(() => {
@@ -70,6 +72,28 @@ export const ProfileForm: React.FC<Props> = ({ initialProfile, onSave }) => {
             value={formData.kota}
             onChange={(e) => setFormData({ ...formData, kota: e.target.value })}
             placeholder="Jakarta Selatan"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran / Guru Kelas</label>
+          <input
+            type="text"
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            value={formData.mataPelajaran}
+            onChange={(e) => setFormData({ ...formData, mataPelajaran: e.target.value })}
+            placeholder="Contoh: Matematika / Guru Kelas V"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tahun Pelaporan</label>
+          <input
+            type="text"
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            value={formData.tahunPelaporan}
+            onChange={(e) => setFormData({ ...formData, tahunPelaporan: e.target.value })}
+            placeholder="Contoh: 2026"
           />
         </div>
         <button

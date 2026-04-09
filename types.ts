@@ -3,6 +3,8 @@ export interface TeacherProfile {
   nip: string;
   unitKerja: string;
   kota: string;
+  mataPelajaran: string;
+  tahunPelaporan: string;
 }
 
 export interface ReportSection {
@@ -30,7 +32,7 @@ export interface AnalysisResult {
 export type CategoryId = 'TEACHING' | 'DIGITAL' | 'CHILD_FRIENDLY' | 'RELIGIOUS_MODERATION' | 'COMPETITION' | 'COMPETENCY' | 'LEARNING_DEVICE' | 'TALENT' | 'MANAGEMENT' | 'HEALTH' | 'CUSTOM';
 
 export interface ReportData {
-  image: string | null; // Base64 or null for text-only reports
+  images: string[]; // Array of Base64 images
   profile: TeacherProfile;
   periode: string;
   analysis: AnalysisResult;
