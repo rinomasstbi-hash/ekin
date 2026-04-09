@@ -68,6 +68,11 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                 categoryId === 'RELIGIOUS_MODERATION' ? 'uppercase text-green-800 tracking-wide border-b-2 border-green-600 inline-block' :
                 categoryId === 'TEACHING' ? 'text-cyan-800 border-b border-cyan-200' :
                 categoryId === 'COMPETITION' ? 'text-violet-900 border-b border-violet-200 uppercase tracking-tight' :
+                categoryId === 'COMPETENCY' ? 'text-blue-900 border-b border-blue-200' :
+                categoryId === 'LEARNING_DEVICE' ? 'text-orange-900 border-b border-orange-200' :
+                categoryId === 'TALENT' ? 'text-fuchsia-900 border-b border-fuchsia-200' :
+                categoryId === 'MANAGEMENT' ? 'text-slate-900 border-b border-slate-200' :
+                categoryId === 'HEALTH' ? 'text-pink-900 border-b border-pink-200' :
                 categoryId === 'CUSTOM' ? 'text-amber-900 border-b border-amber-200' :
                 'text-gray-900 border-b border-gray-300'
               }`}
@@ -88,6 +93,11 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                 categoryId === 'RELIGIOUS_MODERATION' ? 'border-2 border-green-100 p-4 bg-green-50/30' :
                 categoryId === 'TEACHING' ? 'bg-cyan-50/50 p-3 rounded border-l-2 border-cyan-500' :
                 categoryId === 'COMPETITION' ? 'bg-violet-50 p-4 rounded-xl border border-violet-100' :
+                categoryId === 'COMPETENCY' ? 'bg-blue-50 p-3 rounded border-l-2 border-blue-500' :
+                categoryId === 'LEARNING_DEVICE' ? 'bg-orange-50 p-4 rounded-lg border border-orange-100' :
+                categoryId === 'TALENT' ? 'bg-fuchsia-50 p-3 rounded border-l-2 border-fuchsia-500' :
+                categoryId === 'MANAGEMENT' ? 'bg-slate-50 p-4 rounded-xl border border-slate-200' :
+                categoryId === 'HEALTH' ? 'bg-pink-50 p-3 rounded border-l-2 border-pink-500' :
                 categoryId === 'CUSTOM' ? 'bg-amber-50 p-3 rounded border-l-2 border-amber-500' :
                 ''
               }`}>
@@ -130,13 +140,13 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
     const headerPaddingClass = isSuperDense ? 'py-1 px-1' : isVeryDense ? 'py-1 px-2' : 'py-2 px-4';
 
     // Headers text based on category
-    const gradeHeader = categoryId === 'COMPETITION' ? 'Status' : 'Nilai';
-    const descHeader = categoryId === 'COMPETITION' ? 'Capaian / Keterangan' : categoryId === 'CUSTOM' ? 'Keterangan' : 'Deskripsi Sikap';
+    const gradeHeader = categoryId === 'COMPETITION' ? 'Status' : categoryId === 'TALENT' ? 'Tingkat' : categoryId === 'HEALTH' ? 'Status' : 'Nilai';
+    const descHeader = categoryId === 'COMPETITION' ? 'Capaian / Keterangan' : categoryId === 'TALENT' ? 'Potensi Bakat' : categoryId === 'HEALTH' ? 'Hasil Pemeriksaan' : categoryId === 'CUSTOM' ? 'Keterangan' : 'Deskripsi Sikap';
 
     return (
       <div className="w-full">
          <div className="mb-1">
-            <h3 className="text-center font-bold text-sm uppercase mb-0 leading-tight">{analysis.prinsipModerasi || (categoryId === 'COMPETITION' ? 'Daftar Peserta & Prestasi' : categoryId === 'CUSTOM' ? 'Daftar Peserta & Keterangan' : 'Nilai Sikap')}</h3>
+            <h3 className="text-center font-bold text-sm uppercase mb-0 leading-tight">{analysis.prinsipModerasi || (categoryId === 'COMPETITION' ? 'Daftar Peserta & Prestasi' : categoryId === 'TALENT' ? 'Daftar Pemetaan Bakat' : categoryId === 'HEALTH' ? 'Daftar Pemeriksaan Siswa' : categoryId === 'CUSTOM' ? 'Daftar Peserta & Keterangan' : 'Nilai Sikap')}</h3>
             <p className="text-center text-[10px] text-gray-600 italic">"{analysis.caption}"</p>
          </div>
 
@@ -161,6 +171,10 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
                         student.predikat === 'C' ? 'text-amber-600' : 'text-red-600'}`}>
                      {categoryId === 'COMPETITION' 
                         ? (student.predikat === 'SB' ? 'JUARA' : student.predikat === 'B' ? 'FINALIS' : 'PESERTA')
+                        : categoryId === 'TALENT'
+                        ? (student.predikat === 'SB' ? 'SANGAT BERBAKAT' : student.predikat === 'B' ? 'BERBAKAT' : student.predikat === 'C' ? 'CUKUP' : 'KURANG')
+                        : categoryId === 'HEALTH'
+                        ? (student.predikat === 'SB' ? 'SANGAT SEHAT' : student.predikat === 'B' ? 'SEHAT' : student.predikat === 'C' ? 'CUKUP' : 'KURANG')
                         : student.predikat}
                    </td>
                    <td className={`${cellPaddingClass} border-b border-gray-200 text-gray-600 italic ${descFontSize}`}>
@@ -172,7 +186,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
            </table>
          </div>
          
-         {categoryId !== 'COMPETITION' && (
+         {categoryId !== 'COMPETITION' && categoryId !== 'TALENT' && categoryId !== 'HEALTH' && (
            <div className="mt-1 text-[9px] text-gray-500">
              <p><span className="font-bold">Ket:</span> SB=Sangat Baik, B=Baik, C=Cukup, K=Kurang</p>
            </div>
@@ -258,7 +272,7 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
           <div className="w-full mb-4">
             <h4 className="text-xl font-bold uppercase">{profile.unitKerja}</h4>
             <p className={`text-md uppercase ${theme ? `text-${colorName}-700` : 'text-gray-600'}`}>{profile.kota}</p>
-            <p className="text-sm text-gray-500 mt-2">2025</p>
+            <p className="text-sm text-gray-500 mt-2">2026</p>
           </div>
         </div>
       </div>

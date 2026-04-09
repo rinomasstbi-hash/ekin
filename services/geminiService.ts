@@ -96,6 +96,41 @@ export const analyzeImageWithGemini = async (
       2. Title: "Persiapan & Pelaksanaan" (Type: paragraph) -> Deskripsikan proses pembimbingan atau keikutsertaan dalam lomba tersebut.
       3. Title: "Hasil & Prestasi" (Type: list) -> Poin capaian, penghargaan, atau pengalaman yang didapat.
     `;
+  } else if (categoryId === 'COMPETENCY') {
+    structureInstruction = `
+      Buat struktur laporan dengan sections berikut:
+      1. Title: "Identitas Kegiatan" (Type: paragraph) -> Jelaskan Nama Pelatihan/Bimtek/Seminar, Penyelenggara, dan Waktu Pelaksanaan.
+      2. Title: "Materi & Pelaksanaan" (Type: paragraph) -> Deskripsikan ringkasan materi yang dipelajari atau kegiatan yang dilakukan.
+      3. Title: "Rencana Tindak Lanjut" (Type: list) -> Poin-poin implementasi ilmu yang didapat untuk diterapkan di madrasah.
+    `;
+  } else if (categoryId === 'LEARNING_DEVICE') {
+    structureInstruction = `
+      Buat struktur laporan dengan sections berikut:
+      1. Title: "Fokus Penyusunan" (Type: paragraph) -> Jelaskan jenis perangkat (RPP/Modul/Silabus) dan materi/kelas yang dituju.
+      2. Title: "Integrasi & Inovasi" (Type: paragraph) -> Deskripsikan bagaimana perangkat ini memuat pendidikan karakter, numerasi, atau inovasi lainnya.
+      3. Title: "Komponen Perangkat" (Type: list) -> Poin-poin utama yang ada di dalam dokumen perangkat pembelajaran tersebut.
+    `;
+  } else if (categoryId === 'TALENT') {
+    structureInstruction = `
+      Buat struktur laporan dengan sections berikut:
+      1. Title: "Tujuan Program" (Type: paragraph) -> Jelaskan tujuan pemetaan atau pengembangan bakat minat siswa.
+      2. Title: "Metode Pelaksanaan" (Type: paragraph) -> Deskripsikan cara pengumpulan data, seleksi, atau pelaksanaan program pembinaan.
+      3. Title: "Hasil Pemetaan/Pembinaan" (Type: list) -> Poin-poin temuan bakat siswa atau hasil dari program yang dijalankan.
+    `;
+  } else if (categoryId === 'MANAGEMENT') {
+    structureInstruction = `
+      Buat struktur laporan dengan sections berikut:
+      1. Title: "Konteks Administrasi" (Type: paragraph) -> Jelaskan dokumen atau kegiatan tata kelola yang sedang dikerjakan (RKT, SK, Akreditasi, dll).
+      2. Title: "Proses Pelaksanaan" (Type: paragraph) -> Deskripsikan tahapan penyusunan, rapat, atau verifikasi data yang dilakukan.
+      3. Title: "Output & Tindak Lanjut" (Type: list) -> Poin-poin dokumen yang dihasilkan atau langkah selanjutnya dari kegiatan ini.
+    `;
+  } else if (categoryId === 'HEALTH') {
+    structureInstruction = `
+      Buat struktur laporan dengan sections berikut:
+      1. Title: "Tujuan Kegiatan" (Type: paragraph) -> Jelaskan tujuan pemeriksaan kesehatan atau pembinaan pranikah.
+      2. Title: "Pelaksanaan & Pihak Terlibat" (Type: paragraph) -> Deskripsikan jalannya kegiatan dan siapa saja yang terlibat (Puskesmas, Guru, Siswa).
+      3. Title: "Hasil & Rekomendasi" (Type: list) -> Poin-poin hasil pemeriksaan atau rekomendasi tindak lanjut untuk siswa.
+    `;
   } else if (categoryId === 'CUSTOM') {
     structureInstruction = `
       Buat struktur laporan dengan sections berikut:
@@ -106,8 +141,8 @@ export const analyzeImageWithGemini = async (
   }
 
   // HYBRID LOGIC: If student names are provided, ask to generate grades.
-  // Applies to Religious Moderation, Teaching (Character Education), Competition, and Custom
-  if (studentNames && (categoryId === 'RELIGIOUS_MODERATION' || categoryId === 'TEACHING' || categoryId === 'COMPETITION' || categoryId === 'CUSTOM')) {
+  // Applies to Religious Moderation, Teaching (Character Education), Competition, Talent, Health, and Custom
+  if (studentNames && (categoryId === 'RELIGIOUS_MODERATION' || categoryId === 'TEACHING' || categoryId === 'COMPETITION' || categoryId === 'TALENT' || categoryId === 'HEALTH' || categoryId === 'CUSTOM')) {
     
     let focusValue = "";
     let gradingInstruction = "";
@@ -115,6 +150,12 @@ export const analyzeImageWithGemini = async (
     if (categoryId === 'COMPETITION') {
       focusValue = "Kategori/Cabang Lomba";
       gradingInstruction = "Untuk 'predikat', gunakan kode berikut: 'SB' = Juara/Terbaik, 'B' = Finalis/Baik, 'C' = Peserta. Di 'deskripsi', tuliskan capaian spesifik (Juara 1, Harapan 2, Peserta Aktif, dll).";
+    } else if (categoryId === 'TALENT') {
+      focusValue = "Bidang Bakat/Minat";
+      gradingInstruction = "Untuk 'predikat', gunakan 'SB' (Sangat Berbakat), 'B' (Berbakat), 'C' (Cukup), 'K' (Kurang). Di 'deskripsi', tuliskan potensi spesifik siswa.";
+    } else if (categoryId === 'HEALTH') {
+      focusValue = "Fokus Pemeriksaan/Pembinaan";
+      gradingInstruction = "Untuk 'predikat', gunakan 'SB' (Sangat Sehat/Paham), 'B' (Sehat/Paham), 'C' (Cukup), 'K' (Kurang). Di 'deskripsi', tuliskan hasil pemeriksaan atau tingkat pemahaman.";
     } else if (categoryId === 'CUSTOM') {
       focusValue = "Fokus Utama Kegiatan";
       gradingInstruction = "Untuk setiap siswa, berikan nilai (SB/B/C/K) dan deskripsi capaian/keterlibatan yang relevan dengan kegiatan di foto.";

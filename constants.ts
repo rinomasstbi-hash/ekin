@@ -142,6 +142,113 @@ export const RHK_CATEGORIES: RHKCategory[] = [
     ]
   },
   {
+    id: 'COMPETENCY',
+    title: 'Pengembangan Kompetensi',
+    description: 'Laporan keikutsertaan diklat, bimtek, seminar, dan pelatihan guru.',
+    icon: 'M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z',
+    coverTitle: 'Laporan Kegiatan\nPengembangan Kompetensi Guru',
+    theme: {
+      primary: 'text-blue-800',
+      secondary: 'bg-blue-50',
+      accent: 'text-blue-600',
+      bgGradient: 'from-blue-50 to-white',
+      headerColor: 'bg-blue-700',
+      patternPath: 'M12 14l9-5-9-5-9 5 9 5z'
+    },
+    rhkList: [
+      "Mengikuti pelatihan berbasis literasi",
+      "Mengikuti pelatihan metode pengajaran bilingual",
+      "Mengikuti pelatihan penguatan moderasi beragama",
+      "Peningkatan Indeks Profesionalisme ASN",
+      "Sertifikat/Bimtek/Seminar Pendidikan"
+    ]
+  },
+  {
+    id: 'LEARNING_DEVICE',
+    title: 'Perangkat Pembelajaran',
+    description: 'Penyusunan RPP, Modul Ajar, Silabus, dan strategi pembelajaran.',
+    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    coverTitle: 'Laporan Penyusunan\nPerangkat Pembelajaran',
+    theme: {
+      primary: 'text-orange-800',
+      secondary: 'bg-orange-50',
+      accent: 'text-orange-600',
+      bgGradient: 'from-orange-50 to-white',
+      headerColor: 'bg-orange-700',
+      patternPath: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+    },
+    rhkList: [
+      "Menerapkan strategi pembelajaran numerasi",
+      "Penyusunan silabus dan RPP",
+      "Menyusun RPP memuat pendidikan karakter",
+      "Pembuatan Modul Ajar IPA/Mata Pelajaran Lain"
+    ]
+  },
+  {
+    id: 'TALENT',
+    title: 'Bakat & Minat Siswa',
+    description: 'Program pengembangan, pemetaan, dan database bakat minat siswa.',
+    icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z',
+    coverTitle: 'Laporan Program\nPengembangan Bakat & Minat',
+    theme: {
+      primary: 'text-fuchsia-800',
+      secondary: 'bg-fuchsia-50',
+      accent: 'text-fuchsia-600',
+      bgGradient: 'from-fuchsia-50 to-white',
+      headerColor: 'bg-fuchsia-700',
+      patternPath: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'
+    },
+    rhkList: [
+      "Program pengembangan bakat dan minat yang diselenggarakan",
+      "Database siswa madrasah yang memiliki bakat/minat",
+      "Database siswa berbakat/berprestasi pada berbagai bidang",
+      "Pemetaan siswa berprestasi"
+    ]
+  },
+  {
+    id: 'MANAGEMENT',
+    title: 'Tata Kelola & Administrasi',
+    description: 'Penyusunan RKT, Akreditasi, SIMPEG, ZI, dan Supervisi.',
+    icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    coverTitle: 'Laporan Pelaksanaan\nTata Kelola & Administrasi',
+    theme: {
+      primary: 'text-slate-800',
+      secondary: 'bg-slate-100',
+      accent: 'text-slate-600',
+      bgGradient: 'from-slate-100 to-white',
+      headerColor: 'bg-slate-700',
+      patternPath: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
+    },
+    rhkList: [
+      "Data daya tampung dan jumlah siswa existing (PPDB)",
+      "Menyelenggarakan forum RKT",
+      "Database satuan pendidikan termasuk status akreditasi",
+      "Dokumen satuan pendidikan yang menerima pendampingan (Supervisi)",
+      "Surat Keputusan (SK) Tim Pembangunan ZI",
+      "Data profil pegawai yang terekam di SIMPEG"
+    ]
+  },
+  {
+    id: 'HEALTH',
+    title: 'Kesehatan & Kesejahteraan',
+    description: 'Pemeriksaan kesehatan rutin (UKS) dan pembinaan pranikah.',
+    icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+    coverTitle: 'Laporan Kegiatan\nKesehatan & Kesejahteraan Siswa',
+    theme: {
+      primary: 'text-pink-800',
+      secondary: 'bg-pink-50',
+      accent: 'text-pink-600',
+      bgGradient: 'from-pink-50 to-white',
+      headerColor: 'bg-pink-700',
+      patternPath: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z'
+    },
+    rhkList: [
+      "Kegiatan pembinaan pranikah",
+      "Pemeriksaan kesehatan rutin (UKS)",
+      "Kampanye kesehatan dan gizi siswa"
+    ]
+  },
+  {
     id: 'CUSTOM',
     title: 'Custom RHK',
     description: 'Laporan kustom berdasarkan foto atau dokumen yang diunggah. AI akan menganalisis dan membuat laporan yang relevan.',

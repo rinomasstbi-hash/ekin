@@ -139,7 +139,7 @@ const App: React.FC = () => {
         profile: profile,
         periode: `${q?.label} (${q?.range})`, 
         analysis: result,
-        tanggalLaporan: `${randomMonth} 2025`,
+        tanggalLaporan: `${randomMonth} 2026`,
         categoryLabel: categoryConfig ? categoryConfig.coverTitle : 'Laporan Kinerja',
         categoryId: selectedCategoryId,
         coverBorderIndex: randomBorderIndex
@@ -269,8 +269,8 @@ const App: React.FC = () => {
   const headerColor = currentCategory?.theme.headerColor || 'bg-teal-700';
   
   // Logic to determine what inputs to show. 
-  // Now includes TEACHING, RELIGIOUS_MODERATION, COMPETITION, and CUSTOM.
-  const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION' || selectedCategoryId === 'TEACHING' || selectedCategoryId === 'COMPETITION' || selectedCategoryId === 'CUSTOM';
+  // Now includes TEACHING, RELIGIOUS_MODERATION, COMPETITION, TALENT, HEALTH, and CUSTOM.
+  const isHybridMod = selectedCategoryId === 'RELIGIOUS_MODERATION' || selectedCategoryId === 'TEACHING' || selectedCategoryId === 'COMPETITION' || selectedCategoryId === 'TALENT' || selectedCategoryId === 'HEALTH' || selectedCategoryId === 'CUSTOM';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
