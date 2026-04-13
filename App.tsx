@@ -1,4 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db, handleFirestoreError, OperationType } from './firebase';
+import { Login } from './components/Login';
 import { ProfileForm } from './components/ProfileForm';
 import { ReportView } from './components/ReportView';
 import { TeacherProfile, AnalysisResult, ReportData, CategoryId } from './types';
@@ -31,18 +35,16 @@ const App: React.FC = () => {
   // 3. Determine Effective Key (User Input > Env Var)
   const EFFECTIVE_API_KEY = customApiKey || ENV_API_KEY;
 
-  const [profile, setProfile] = useState<TeacherProfile | null>(() => {
-    if (typeof window !== 'undefined') {
-      const savedProfile = localStorage.getItem('rhk_profile');
-      return savedProfile ? JSON.parse(savedProfile) : null;
-    }
-    return null;
-  });
+  // Auth & Profile State
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<TeacherProfile | null>(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId | null>(null);
   const [selectedRhkItem, setSelectedRhkItem] = useState<string>('');
   const [reportData, setReportData] = useState<ReportData | null>(null);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   
   // States for Student Assessment (Hybrid Mode)
   const [studentNames, setStudentNames] = useState<string>('');
@@ -62,9 +64,47 @@ const App: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSaveProfile = (newProfile: TeacherProfile) => {
-    setProfile(newProfile);
-    localStorage.setItem('rhk_profile', JSON.stringify(newProfile));
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        setIsProfileLoading(true);
+        try {
+          const docRef = doc(db, 'users', currentUser.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setProfile(docSnap.data() as TeacherProfile);
+          } else {
+            setProfile(null);
+          }
+        } catch (err) {
+          handleFirestoreError(err, OperationType.GET, `users/${currentUser.uid}`);
+        } finally {
+          setIsProfileLoading(false);
+          setIsAuthReady(true);
+        }
+      } else {
+        setProfile(null);
+        setIsAuthReady(true);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSaveProfile = async (newProfile: TeacherProfile) => {
+    if (!user) return;
+    try {
+      const profileData = {
+        ...newProfile,
+        email: user.email,
+        role: 'user'
+      };
+      await setDoc(doc(db, 'users', user.uid), profileData);
+      setProfile(newProfile);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `users/${user.uid}`);
+      alert("Gagal menyimpan profil.");
+    }
   };
 
   const handleChangeProfile = () => {
@@ -76,19 +116,40 @@ const App: React.FC = () => {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    if (selectedImages.length + files.length > 5) {
+      alert("Maksimal 5 foto yang dapat diupload.");
+      return;
+    }
+
+    const newImages: string[] = [];
+    let hasError = false;
+
+    files.forEach(file => {
       if (file.size > 5 * 1024 * 1024) { 
-        alert("Ukuran file terlalu besar (Maks 5MB)");
+        hasError = true;
         return;
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSelectedImage(reader.result as string);
-        setError(null);
+        newImages.push(reader.result as string);
+        if (newImages.length === files.length - (hasError ? 1 : 0)) {
+          setSelectedImages(prev => [...prev, ...newImages]);
+          setError(null);
+        }
       };
       reader.readAsDataURL(file);
+    });
+
+    if (hasError) {
+      alert("Beberapa file terlalu besar dan diabaikan (Maks 5MB per file).");
     }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleProcess = async () => {
@@ -99,7 +160,7 @@ const App: React.FC = () => {
     if (!profile || !selectedCategoryId) return;
 
     // 1. Validation for Image (Always Required)
-    if (!selectedImage) {
+    if (selectedImages.length === 0) {
       setError("Mohon upload foto kegiatan terlebih dahulu.");
       return;
     }
@@ -110,7 +171,7 @@ const App: React.FC = () => {
     try {
       const result: AnalysisResult = await analyzeImageWithGemini(
         EFFECTIVE_API_KEY, 
-        selectedImage,
+        selectedImages[0],
         selectedCategoryId,
         userNote,
         studentNames,
@@ -137,11 +198,11 @@ const App: React.FC = () => {
       const randomBorderIndex = Math.floor(Math.random() * 5);
 
       const newReport: ReportData = {
-        image: selectedImage,
+        images: selectedImages,
         profile: profile,
         periode: `${q?.label} (${q?.range})`, 
         analysis: result,
-        tanggalLaporan: `${randomMonth} 2026`,
+        tanggalLaporan: `${randomMonth} ${profile.tahunPelaporan || '2026'}`,
         categoryLabel: categoryConfig ? categoryConfig.coverTitle : 'Laporan Kinerja',
         categoryId: selectedCategoryId,
         coverBorderIndex: randomBorderIndex
@@ -157,7 +218,7 @@ const App: React.FC = () => {
 
   const resetAll = () => {
     setReportData(null);
-    setSelectedImage(null);
+    setSelectedImages([]);
     setUserNote(''); 
     setStudentNames('');
     setKelas('');
@@ -168,13 +229,21 @@ const App: React.FC = () => {
 
   const handleBackToMenu = () => {
     setSelectedCategoryId(null);
-    setSelectedImage(null);
+    setSelectedImages([]);
     setUserNote('');
     setStudentNames('');
     setKelas('');
     setSelectedRhkItem('');
     setError(null);
   };
+
+  if (!isAuthReady || isProfileLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!user) {
+    return <Login />;
+  }
 
   // Logic: Show setup screen ONLY if neither Env Key nor Custom Key is present AND user hasn't tried to input one yet.
   if (!EFFECTIVE_API_KEY && !error && !ENV_API_KEY) {
@@ -218,51 +287,72 @@ const App: React.FC = () => {
 
   if (!selectedCategoryId) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center pt-6 sm:pt-10 pb-6 px-4">
-        <div className="w-full max-w-4xl">
-           <header className="flex justify-between items-center mb-8">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-800">Pilih Jenis Laporan</h1>
-                <p className="text-slate-500">Silakan pilih kategori Rencana Hasil Kerja (RHK) yang akan dibuat.</p>
+      <div className="min-h-screen bg-[#f8fafc] relative overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-teal-900/5 to-transparent pointer-events-none"></div>
+        <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-teal-400/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+          <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-teal-100 text-teal-700 text-xs font-bold tracking-wider uppercase mb-6 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+                Sistem Pelaporan RHK
               </div>
-              <button onClick={handleChangeProfile} className="text-sm text-teal-600 hover:underline font-semibold">
-                Profil: {profile.nama}
-              </button>
-           </header>
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
+                Pilih Jenis Laporan
+              </h1>
+              <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
+                Pilih kategori Rencana Hasil Kerja di bawah ini. AI akan membantu Anda menyusun laporan lengkap beserta analisis dan format yang sesuai standar.
+              </p>
+            </div>
+            
+            <div 
+              className="flex items-center gap-4 bg-white p-2 pr-6 rounded-full shadow-sm border border-slate-200 cursor-pointer hover:shadow-md hover:border-teal-300 transition-all group" 
+              onClick={handleChangeProfile} 
+              title="Edit Profil"
+            >
+              <div className="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-teal-50 flex items-center justify-center text-slate-600 group-hover:text-teal-600 transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-slate-800 leading-tight group-hover:text-teal-700 transition-colors">{profile.nama}</span>
+                <span className="text-xs text-slate-500 leading-tight">{profile.unitKerja}</span>
+              </div>
+            </div>
+          </header>
 
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {RHK_CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategoryId(cat.id)}
-                  className={`
-                    relative overflow-hidden p-6 rounded-2xl shadow-sm hover:shadow-xl hover:scale-[1.02] border transition-all text-left group
-                    ${cat.theme.bgGradient} border-slate-100 hover:border-transparent
-                  `}
-                >
-                  {/* Background Shape Pattern */}
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 opacity-10 pointer-events-none transform rotate-12 group-hover:scale-110 group-hover:opacity-20 transition-all duration-500">
-                     <svg viewBox="0 0 24 24" fill="currentColor" className={cat.theme.primary}>
-                        <path d={cat.theme.patternPath} />
-                     </svg>
-                  </div>
-
-                  <div className={`
-                    w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors z-10 relative
-                    ${cat.theme.secondary} ${cat.theme.primary} group-hover:bg-white
-                  `}>
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={cat.icon} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {RHK_CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategoryId(cat.id)}
+                className="group relative bg-white p-8 rounded-[2rem] border border-slate-200 hover:border-teal-400 hover:shadow-2xl hover:shadow-teal-900/10 transition-all duration-500 text-left flex flex-col h-full overflow-hidden transform hover:-translate-y-1"
+              >
+                {/* Subtle background gradient blob on hover */}
+                <div className={`absolute -right-10 -top-10 w-48 h-48 rounded-full blur-3xl opacity-0 group-hover:opacity-50 transition-opacity duration-700 ${cat.theme.secondary}`}></div>
+                
+                <div className="relative z-10 flex-grow">
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 ${cat.theme.secondary} ${cat.theme.primary}`}>
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={cat.icon} />
                     </svg>
                   </div>
                   
-                  <div className="relative z-10">
-                    <h3 className={`text-lg font-bold mb-1 ${cat.theme.primary}`}>{cat.title}</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed opacity-90 line-clamp-2">{cat.description}</p>
+                  <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-teal-700 transition-colors">{cat.title}</h3>
+                  <p className="text-slate-500 leading-relaxed text-sm mb-6 line-clamp-3">{cat.description}</p>
+                </div>
+                
+                <div className="relative z-10 mt-auto pt-5 border-t border-slate-100 flex items-center justify-between text-sm font-bold text-slate-400 group-hover:text-teal-600 transition-colors duration-300">
+                  <span>Buat Laporan</span>
+                  <div className="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
+                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                   </div>
-                </button>
-              ))}
-           </div>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -331,36 +421,46 @@ const App: React.FC = () => {
           </div>
 
           {/* --- IMAGE UPLOAD SECTION (Required for All) --- */}
-          <div 
-            onClick={() => !isAnalyzing && fileInputRef.current?.click()}
-            className={`
-              relative group cursor-pointer rounded-3xl border-2 border-dashed transition-all duration-300 overflow-hidden aspect-video flex flex-col items-center justify-center text-center p-6
-              ${selectedImage ? 'border-transparent bg-slate-50' : 'border-slate-300 hover:border-current hover:bg-slate-50'}
-              ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}
-              ${currentCategory?.theme.accent || 'text-teal-600'}
-            `}
-          >
-            {selectedImage ? (
-              <>
-                <img src={selectedImage} alt="Preview" className="absolute inset-0 w-full h-full object-contain z-0 bg-black/5" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 text-white font-medium">
-                  Ganti Foto / Sertifikat
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+              Upload Foto / Sertifikat (Maks 5)
+            </label>
+            
+            <div className="grid grid-cols-3 gap-2">
+              {selectedImages.map((img, idx) => (
+                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group">
+                  <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                  <button 
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
                 </div>
-              </>
-            ) : (
-              <>
-                <div className={`p-4 rounded-full mb-3 group-hover:scale-110 transition-transform ${currentCategory?.theme.secondary || 'bg-teal-50'}`}>
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              ))}
+              
+              {selectedImages.length < 5 && (
+                <div 
+                  onClick={() => !isAnalyzing && fileInputRef.current?.click()}
+                  className={`
+                    relative cursor-pointer rounded-xl border-2 border-dashed transition-all duration-300 aspect-square flex flex-col items-center justify-center text-center p-2
+                    border-slate-300 hover:border-current hover:bg-slate-50
+                    ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}
+                    ${currentCategory?.theme.accent || 'text-teal-600'}
+                  `}
+                >
+                  <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                  <span className="text-[10px] font-medium text-slate-500">Tambah Foto</span>
                 </div>
-                <h3 className="font-bold text-slate-700 text-lg">Upload Foto / Sertifikat</h3>
-                <p className="text-sm text-slate-400">Bukti kegiatan atau sertifikat lomba</p>
-              </>
-            )}
+              )}
+            </div>
+            
             <input 
               type="file" 
               ref={fileInputRef}
               onChange={handleFileChange} 
               accept="image/*" 
+              multiple
               className="hidden" 
               disabled={isAnalyzing}
             />

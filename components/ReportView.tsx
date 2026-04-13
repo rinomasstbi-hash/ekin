@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const ReportView: React.FC<Props> = ({ data, onReset }) => {
-  const { profile, analysis, image, periode, tanggalLaporan, categoryLabel, categoryId, coverBorderIndex } = data;
+  const { profile, analysis, images, periode, tanggalLaporan, categoryLabel, categoryId, coverBorderIndex } = data;
 
   // --- GET THEME CONFIG ---
   const categoryConfig = RHK_CATEGORIES.find(c => c.id === categoryId);
@@ -320,14 +320,20 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
           <div className="flex-1 flex flex-col">
             <h3 className="font-bold text-lg mb-4 border-b border-gray-200 pb-1">D. Dokumentasi Kegiatan</h3>
             
-            <div className="flex-1 border border-gray-300 bg-gray-50 rounded-lg p-4 flex items-center justify-center overflow-hidden max-h-[140mm]">
-              {image && (
-                <img 
-                  src={image} 
-                  alt="Bukti Kegiatan" 
-                  className="w-full h-full object-contain" 
-                />
-              )}
+            <div className={`flex-1 border border-gray-300 bg-gray-50 rounded-lg p-4 grid gap-4 overflow-hidden max-h-[140mm] ${
+              images && images.length > 1 
+                ? images.length <= 2 ? 'grid-cols-2' : images.length <= 4 ? 'grid-cols-2 grid-rows-2' : 'grid-cols-3 grid-rows-2'
+                : 'grid-cols-1'
+            }`}>
+              {images && images.map((img, idx) => (
+                <div key={idx} className="flex items-center justify-center overflow-hidden bg-white border border-gray-200 rounded shadow-sm">
+                  <img 
+                    src={img} 
+                    alt={`Bukti Kegiatan ${idx + 1}`} 
+                    className="w-full h-full object-contain" 
+                  />
+                </div>
+              ))}
             </div>
             <p className="text-center text-sm text-gray-500 mt-2 italic">Gambar 1.1: {analysis.caption}</p>
           </div>
