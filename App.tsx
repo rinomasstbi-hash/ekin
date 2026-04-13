@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { Login } from './components/Login';
@@ -54,6 +54,7 @@ const App: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedQuarter, setSelectedQuarter] = useState<number>(1);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   
   const quarters = [
     { id: 1, label: 'Triwulan I', range: 'Januari - Maret' },
@@ -108,10 +109,19 @@ const App: React.FC = () => {
   };
 
   const handleChangeProfile = () => {
-    if (confirm("Ubah data profil guru?")) {
+    setProfile(null);
+    setReportData(null);
+    setSelectedCategoryId(null);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
       setProfile(null);
       setReportData(null);
       setSelectedCategoryId(null);
+    } catch (error) {
+      console.error("Error signing out: ", error);
     }
   };
 
@@ -279,7 +289,14 @@ const App: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4 relative">
+        <button 
+          onClick={handleSignOut}
+          className="absolute top-6 right-6 flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          <span className="text-sm font-medium">Sign Out</span>
+        </button>
         <ProfileForm initialProfile={null} onSave={handleSaveProfile} />
       </div>
     );
@@ -308,25 +325,57 @@ const App: React.FC = () => {
               </p>
             </div>
             
-            <div 
-              className="flex items-center gap-4 bg-white p-2 pr-6 rounded-full shadow-sm border border-slate-200 cursor-pointer hover:shadow-md hover:border-teal-300 transition-all group" 
-              onClick={handleChangeProfile} 
-              title="Edit Profil"
-            >
-              <div className="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-teal-50 flex items-center justify-center text-slate-600 group-hover:text-teal-600 transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <div className="flex items-center gap-3">
+              <div 
+                className="flex items-center gap-4 bg-white p-2 pr-6 rounded-full shadow-sm border border-slate-200 cursor-pointer hover:shadow-md hover:border-teal-300 transition-all group" 
+                onClick={handleChangeProfile} 
+                title="Edit Profil"
+              >
+                <div className="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-teal-50 flex items-center justify-center text-slate-600 group-hover:text-teal-600 transition-colors">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-slate-800 leading-tight group-hover:text-teal-700 transition-colors">{profile.nama}</span>
+                  <span className="text-xs text-slate-500 leading-tight">{profile.unitKerja}</span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-bold text-slate-800 leading-tight group-hover:text-teal-700 transition-colors">{profile.nama}</span>
-                <span className="text-xs text-slate-500 leading-tight">{profile.unitKerja}</span>
-              </div>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-sm border border-slate-200 text-slate-400 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
+                title="Keluar (Sign Out)"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+              </button>
             </div>
           </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {RHK_CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
+          {/* Search Bar */}
+          <div className="mb-8 max-w-md relative z-10">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-2xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all shadow-sm"
+                placeholder="Cari jenis laporan RHK..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
+            {RHK_CATEGORIES.filter(cat => 
+              cat.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+              cat.description.toLowerCase().includes(searchQuery.toLowerCase())
+            ).length > 0 ? (
+              RHK_CATEGORIES.filter(cat => 
+                cat.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                cat.description.toLowerCase().includes(searchQuery.toLowerCase())
+              ).map((cat) => (
+                <button
+                  key={cat.id}
                 onClick={() => setSelectedCategoryId(cat.id)}
                 className="group relative bg-white p-8 rounded-[2rem] border border-slate-200 hover:border-teal-400 hover:shadow-2xl hover:shadow-teal-900/10 transition-all duration-500 text-left flex flex-col h-full overflow-hidden transform hover:-translate-y-1"
               >
@@ -351,7 +400,13 @@ const App: React.FC = () => {
                   </div>
                 </div>
               </button>
-            ))}
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center text-slate-500 bg-white rounded-[2rem] border border-slate-200 border-dashed">
+                <svg className="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <p>Tidak ada jenis laporan yang cocok dengan pencarian "{searchQuery}".</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
