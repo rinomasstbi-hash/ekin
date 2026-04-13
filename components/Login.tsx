@@ -1,15 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
 
 export const Login: React.FC = () => {
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isIframe, setIsIframe] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Detect if the app is running inside an iframe (like the AI Studio preview)
+    setIsIframe(window !== window.parent);
+  }, []);
+
   const handleLogin = async () => {
+    setErrorMsg(null);
     try {
       await signInWithPopup(auth, googleProvider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      alert("Gagal login. Silakan coba lagi.");
+      setErrorMsg(error.message || "Gagal login. Silakan coba lagi.");
     }
+  };
+
+  const handleOpenNewTab = () => {
+    window.open(window.location.href, '_blank');
   };
 
   return (
@@ -25,6 +38,34 @@ export const Login: React.FC = () => {
           <p className="text-slate-500">Masuk untuk membuat dan mengelola laporan Rencana Hasil Kerja Anda.</p>
         </div>
         
+        {isIframe && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl text-left">
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              <div>
+                <p className="font-bold mb-1">Perhatian: Mode Preview</p>
+                <p className="mb-3">Login Google seringkali diblokir oleh browser saat berada di dalam layar preview ini.</p>
+                <button 
+                  onClick={handleOpenNewTab}
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>Buka di Tab Baru</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {errorMsg && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl text-left break-words">
+            <strong>Error:</strong> {errorMsg}
+            <p className="mt-2 text-xs text-red-500">
+              Jika menggunakan browser Safari atau mode Incognito, pastikan Anda mengizinkan pop-up dan cross-site tracking. Atau coba buka aplikasi di tab baru.
+            </p>
+          </div>
+        )}
+
         <button
           onClick={handleLogin}
           className="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all"
