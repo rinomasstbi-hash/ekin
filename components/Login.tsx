@@ -4,6 +4,7 @@ import { auth, googleProvider } from '../firebase';
 
 export const Login: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [isIframe, setIsIframe] = useState<boolean>(false);
 
   useEffect(() => {
@@ -13,10 +14,12 @@ export const Login: React.FC = () => {
 
   const handleLogin = async () => {
     setErrorMsg(null);
+    setErrorCode(null);
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error: any) {
       console.error("Login error:", error);
+      setErrorCode(error.code || null);
       setErrorMsg(error.message || "Gagal login. Silakan coba lagi.");
     }
   };
@@ -60,9 +63,24 @@ export const Login: React.FC = () => {
         {errorMsg && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl text-left break-words">
             <strong>Error:</strong> {errorMsg}
-            <p className="mt-2 text-xs text-red-500">
-              Jika menggunakan browser Safari atau mode Incognito, pastikan Anda mengizinkan pop-up dan cross-site tracking. Atau coba buka aplikasi di tab baru.
-            </p>
+            
+            {errorCode === 'auth/unauthorized-domain' || errorMsg.includes('unauthorized-domain') ? (
+              <div className="mt-3 pt-3 border-t border-red-200">
+                <p className="font-bold mb-2">Cara Memperbaiki Error Ini:</p>
+                <ol className="list-decimal pl-4 space-y-2 text-red-700">
+                  <li>Buka <a href="https://console.firebase.google.com/project/gen-lang-client-0527864750/authentication/settings" target="_blank" rel="noreferrer" className="underline font-bold text-blue-600">Pengaturan Firebase Console</a></li>
+                  <li>Scroll ke bagian <strong>Authorized domains</strong></li>
+                  <li>Klik tombol <strong>Add domain</strong></li>
+                  <li>Copy dan paste URL Netlify Anda: <code className="bg-red-100 px-1 py-0.5 rounded select-all block mt-1 mb-1 font-mono text-xs">smart-rhk.netlify.app</code></li>
+                  <li>Jika Anda juga mengakses dari AI Studio, tambahkan: <code className="bg-red-100 px-1 py-0.5 rounded select-all block mt-1 font-mono text-xs">ais-dev-ijy2qs7infm2mku3l2ld4f-133408405278.asia-southeast1.run.app</code></li>
+                  <li>Refresh halaman web Anda dan coba login kembali.</li>
+                </ol>
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-red-500">
+                Jika menggunakan browser Safari atau mode Incognito, pastikan Anda mengizinkan pop-up dan cross-site tracking. Atau coba buka aplikasi di tab baru.
+              </p>
+            )}
           </div>
         )}
 

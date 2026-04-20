@@ -303,111 +303,108 @@ const App: React.FC = () => {
   }
 
   if (!selectedCategoryId) {
+    // Helper function to shorten titles for the small grid layout
+    const shortenTitle = (title: string) => {
+      switch (title) {
+          case 'Pelaksanaan Pembelajaran': return 'Pembelajaran';
+          case 'Pengembangan Kompetensi': return 'Kompetensi';
+          case 'Perangkat Pembelajaran': return 'Perangkat';
+          case 'Sekolah Ramah Anak': return 'Ramah Anak';
+          case 'Moderasi Beragama': return 'Moderasi';
+          case 'Kompetisi / Lomba': return 'Kompetisi';
+          case 'Pemetaan Bakat & Minat': return 'Bakat & Minat';
+          case 'Manajemen Sekolah': return 'Manajemen';
+          case 'Kesehatan Siswa': return 'Kesehatan';
+          case 'Inovasi Digital': return 'Inovasi';
+          case 'Laporan Kustom': return 'Kustom';
+          default: return title;
+      }
+    };
+
     return (
-      <div className="min-h-screen bg-[#f8fafc] relative overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-teal-900/5 to-transparent pointer-events-none"></div>
-        <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-teal-400/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
-          <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-teal-100 text-teal-700 text-xs font-bold tracking-wider uppercase mb-6 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
-                Sistem Pelaporan RHK
-              </div>
-              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-                Pilih Jenis Laporan
-              </h1>
-              <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
-                Pilih kategori Rencana Hasil Kerja di bawah ini. AI akan membantu Anda menyusun laporan lengkap beserta analisis dan format yang sesuai standar.
-              </p>
+      <div className="min-h-screen bg-slate-100 flex justify-center pb-16 sm:pb-0">
+        <div className="w-full max-w-[480px] bg-white min-h-screen relative shadow-2xl flex flex-col">
+          
+          {/* Header Mobile Layout */}
+          <div className="px-6 pt-10 pb-4 flex justify-between items-center bg-white z-10 w-full">
+            <div className="flex items-center">
+               <img 
+                 src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Kementerian_Agama_new_logo.png" 
+                 alt="Logo" 
+                 className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+               />
             </div>
-            
-            <div className="flex items-center gap-3">
-              <div 
-                className="flex items-center gap-4 bg-white p-2 pr-6 rounded-full shadow-sm border border-slate-200 cursor-pointer hover:shadow-md hover:border-teal-300 transition-all group" 
-                onClick={handleChangeProfile} 
-                title="Edit Profil"
-              >
-                <div className="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-teal-50 flex items-center justify-center text-slate-600 group-hover:text-teal-600 transition-colors">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-slate-800 leading-tight group-hover:text-teal-700 transition-colors">{profile.nama}</span>
-                  <span className="text-xs text-slate-500 leading-tight">{profile.unitKerja}</span>
-                </div>
+            <div className="flex items-center gap-3 text-right">
+              <div className="flex flex-col items-end">
+                <span className="text-sm font-bold text-slate-800 leading-tight">{profile.nama}</span>
+                <span className="text-[10px] text-slate-500 leading-tight">{profile.unitKerja}</span>
               </div>
-              <button
-                onClick={handleSignOut}
-                className="flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-sm border border-slate-200 text-slate-400 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
-                title="Keluar (Sign Out)"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-              </button>
-            </div>
-          </header>
-
-          {/* Search Bar */}
-          <div className="mb-8 max-w-md relative z-10">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 border border-slate-200 flex-shrink-0">
+                <img 
+                  src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.nama)}&background=14b8a6&color=fff&bold=true`} 
+                  alt="Avatar" 
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <input
-                type="text"
-                className="block w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-2xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all shadow-sm"
-                placeholder="Cari jenis laporan RHK..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
-            {RHK_CATEGORIES.filter(cat => 
-              cat.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-              cat.description.toLowerCase().includes(searchQuery.toLowerCase())
-            ).length > 0 ? (
-              RHK_CATEGORIES.filter(cat => 
-                cat.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                cat.description.toLowerCase().includes(searchQuery.toLowerCase())
-              ).map((cat) => (
-                <button
-                  key={cat.id}
-                onClick={() => setSelectedCategoryId(cat.id)}
-                className="group relative bg-white p-8 rounded-[2rem] border border-slate-200 hover:border-teal-400 hover:shadow-2xl hover:shadow-teal-900/10 transition-all duration-500 text-left flex flex-col h-full overflow-hidden transform hover:-translate-y-1"
-              >
-                {/* Subtle background gradient blob on hover */}
-                <div className={`absolute -right-10 -top-10 w-48 h-48 rounded-full blur-3xl opacity-0 group-hover:opacity-50 transition-opacity duration-700 ${cat.theme.secondary}`}></div>
-                
-                <div className="relative z-10 flex-grow">
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 ${cat.theme.secondary} ${cat.theme.primary}`}>
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Blue Info Card */}
+          <div className="px-6 mb-6 mt-2">
+            <div className="bg-[#1e40af] text-white rounded-xl py-4 flex justify-center items-center shadow-md">
+               <div className="flex-1 text-center border-r border-blue-400/30">
+                 <div className="text-2xl font-bold">{profile.tahunPelaporan || "2026"}</div>
+                 <div className="text-[10px] sm:text-xs text-blue-200 mt-1">Tahun Laporan</div>
+               </div>
+               <div className="flex-1 text-center">
+                 <div className="text-2xl font-bold">{profile.nip ? profile.nip.slice(0, 6) + "..." : "-"}</div>
+                 <div className="text-[10px] sm:text-xs text-blue-200 mt-1">Status Kepegawaian</div>
+               </div>
+            </div>
+          </div>
+
+          {/* Grid Menu */}
+          <div className="flex-1 px-6 pb-24 overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="grid grid-cols-3 gap-y-8 gap-x-2">
+              {RHK_CATEGORIES.map(cat => (
+                <button 
+                  key={cat.id} 
+                  onClick={() => setSelectedCategoryId(cat.id)}
+                  className="flex flex-col items-center group w-full"
+                >
+                  <div className={`w-[60px] h-[60px] sm:w-[70px] sm:h-[70px] rounded-[1.25rem] flex items-center justify-center mb-2 shadow-sm transition-transform active:scale-90 ${cat.theme.secondary} ${cat.theme.primary}`}>
+                    <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={cat.icon} />
                     </svg>
                   </div>
-                  
-                  <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-teal-700 transition-colors">{cat.title}</h3>
-                  <p className="text-slate-500 leading-relaxed text-sm mb-6 line-clamp-3">{cat.description}</p>
-                </div>
-                
-                <div className="relative z-10 mt-auto pt-5 border-t border-slate-100 flex items-center justify-between text-sm font-bold text-slate-400 group-hover:text-teal-600 transition-colors duration-300">
-                  <span>Buat Laporan</span>
-                  <div className="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-teal-50 flex items-center justify-center transition-colors">
-                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                  </div>
-                </div>
-              </button>
-              ))
-            ) : (
-              <div className="col-span-full py-12 text-center text-slate-500 bg-white rounded-[2rem] border border-slate-200 border-dashed">
-                <svg className="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <p>Tidak ada jenis laporan yang cocok dengan pencarian "{searchQuery}".</p>
-              </div>
-            )}
+                  <span className="text-[11px] sm:text-xs font-medium text-slate-700 text-center leading-tight line-clamp-2 px-1">
+                    {shortenTitle(cat.title)}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* Bottom Navigation */}
+          <div className="fixed sm:absolute bottom-0 left-0 sm:left-auto w-full sm:max-w-[480px] bg-white border-t border-slate-200 px-6 py-3 flex justify-between items-center rounded-t-2xl sm:rounded-none z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <button className="flex flex-col items-center gap-1 text-[#1e40af] w-1/4">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+              <span className="text-[10px] font-bold">Beranda</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors w-1/4">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              <span className="text-[10px] font-medium">Riwayat</span>
+            </button>
+            <button onClick={handleChangeProfile} className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors w-1/4">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              <span className="text-[10px] font-medium">Profil</span>
+            </button>
+            <button onClick={handleSignOut} className="flex flex-col items-center gap-1 text-slate-400 hover:text-red-500 transition-colors w-1/4">
+               <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+               <span className="text-[10px] font-medium">Keluar</span>
+            </button>
+          </div>
+          
         </div>
       </div>
     );

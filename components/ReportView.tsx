@@ -55,6 +55,188 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
     };
   }, [categoryId, periode, categoryConfig]);
 
+  // --- SIGNATURE ROLES DYNAMICS ---
+  const getSignatureRoles = () => {
+    switch (categoryId) {
+      case 'DIGITAL': return { left: "Mengetahui,\nKepala Madrasah", right: "Guru Pengampu Digital" };
+      case 'COMPETITION': return { left: "Mengetahui,\nKepala Madrasah", right: "Guru Pembimbing" };
+      case 'MANAGEMENT': return { left: "Mengetahui,\nKepala Madrasah", right: "Penyusun Laporan" };
+      case 'HEALTH': return { left: "Kepala Madrasah", right: "Pembina UKS / Wali Kelas" };
+      case 'CHILD_FRIENDLY': return { left: "Mengetahui,\nKepala Madrasah", right: "Guru BK / Pendamping" };
+      case 'TALENT': return { left: "Mengetahui,\nKepala Madrasah", right: "Guru Pembimbing Bakat" };
+      default: return { left: "Mengetahui,\nKepala Madrasah", right: "Guru Penyusun" };
+    }
+  };
+  const signatures = getSignatureRoles();
+
+  // --- DYNAMIC COVER COMPONENTS ---
+  const renderCoverContent = () => {
+    const rhkMatch = analysis.judul_terpilih.match(/\[(RHK \d+)\]/);
+    const rhkBadge = rhkMatch ? rhkMatch[1] : null;
+    const cleanTitle = analysis.judul_terpilih.replace(/\[RHK \d+\]\s*/, '');
+
+    const isModern = ['DIGITAL', 'MANAGEMENT', 'LEARNING_DEVICE'].includes(categoryId || '');
+    const isElegant = ['COMPETITION', 'TALENT'].includes(categoryId || '');
+    const isMinimal = ['CHILD_FRIENDLY', 'HEALTH'].includes(categoryId || '');
+
+    if (isModern) {
+      // MODERN: Left-aligned, thick accent line, clean typography
+      return (
+        <div className={`flex-1 flex flex-col justify-center text-left pl-10 border-l-[12px] bg-white/70 backdrop-blur-sm print:bg-transparent ${theme ? `border-${colorName}-600` : 'border-gray-800'}`}>
+          <div className="mb-auto mt-8 flex items-center justify-between">
+            <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Kementerian_Agama_new_logo.png" 
+              alt="Logo Kementerian Agama" 
+              className="w-24 h-auto object-contain"
+            />
+            <div className={`text-right ${theme ? `text-${colorName}-600` : 'text-gray-500'}`}>
+              <p className="font-bold tracking-widest uppercase text-sm">Tahun Pelaporan</p>
+              <p className="text-2xl font-bold">{periode}</p>
+            </div>
+          </div>
+          
+          <div className="my-16">
+            <h1 className={`text-3xl font-sans font-black tracking-tight uppercase mb-4 leading-tight ${theme?.primary || 'text-slate-900'}`}>
+              {categoryLabel || "Laporan Kinerja"}
+            </h1>
+            {rhkBadge && <span className={`inline-block px-3 py-1 mb-4 rounded-md text-sm font-bold tracking-widest ${theme ? `bg-${colorName}-100 text-${colorName}-700` : 'bg-gray-100 text-gray-700'}`}>{rhkBadge}</span>}
+            <h2 className={`text-2xl font-serif font-bold ${theme ? `text-slate-700` : 'text-gray-700'}`}>
+              {cleanTitle}
+            </h2>
+          </div>
+
+          <div className="mt-auto mb-8">
+            <p className="text-xs uppercase tracking-widest text-gray-500 mb-2">Disusun Oleh:</p>
+            <h3 className={`text-2xl font-bold ${theme ? `text-${colorName}-900` : 'text-slate-900'}`}>
+              {profile.nama}
+            </h3>
+            <p className="text-md mt-1 font-mono text-slate-600">{profile.nip ? `NIP. ${profile.nip}` : '-'}</p>
+            <div className={`mt-6 pt-6 border-t-2 w-2/3 ${theme ? `border-${colorName}-200` : 'border-gray-200'}`}>
+              <h4 className="text-lg font-bold uppercase text-slate-800">{profile.unitKerja}</h4>
+              <p className="text-sm font-medium text-slate-500 uppercase">{profile.kota}</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (isElegant) {
+      // ELEGANT: Certificate-like, centered, decorative borders
+      return (
+         <div className={`flex-1 flex flex-col items-center justify-between text-center p-10 border-[16px] border-double bg-white/80 backdrop-blur-md print:bg-transparent ${theme ? `border-${colorName}-700` : 'border-gray-800'}`}>
+          <div className="mt-8 flex flex-col items-center">
+             <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Kementerian_Agama_new_logo.png" 
+              alt="Logo Kementerian Agama" 
+              className="w-28 h-auto mb-8 object-contain"
+            />
+            <h1 className={`text-sm font-sans font-bold tracking-[0.3em] uppercase mb-12 ${theme ? `text-${colorName}-600` : 'text-gray-500'}`}>
+              Dokumen Prestasi & Bakat
+            </h1>
+            <h2 className={`text-4xl font-serif font-bold uppercase mb-6 leading-snug px-4 ${theme?.primary || 'text-slate-900'}`}>
+              {categoryLabel || "Laporan Kinerja"}
+            </h2>
+            <div className={`w-24 h-1 mx-auto mb-6 ${theme ? `bg-${colorName}-500` : 'bg-gray-800'}`}></div>
+            <h3 className={`text-xl font-serif italic px-8 ${theme ? `text-slate-700` : 'text-gray-700'}`}>
+              "{cleanTitle}"
+            </h3>
+            {rhkBadge && <span className={`block mt-6 text-sm font-bold tracking-widest ${theme ? `text-${colorName}-400` : 'text-gray-400'}`}>{rhkBadge}</span>}
+          </div>
+
+          <div className="mb-12 flex flex-col items-center w-full">
+            <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Guru Pembimbing / Pendamping</p>
+            <h3 className={`text-2xl font-bold uppercase tracking-wide ${theme ? `text-${colorName}-900` : 'text-slate-900'}`}>
+              {profile.nama}
+            </h3>
+            <p className="text-sm mt-2 mb-6 font-mono font-medium text-slate-600">{profile.nip ? `NIP. ${profile.nip}` : '-'}</p>
+            
+            <p className="text-md uppercase font-bold text-slate-800">{profile.unitKerja}</p>
+            <p className={`text-sm uppercase tracking-widest mt-1 ${theme ? `text-${colorName}-700` : 'text-gray-600'}`}>{profile.kota} - {periode}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (isMinimal) {
+      // MINIMAL: Soft, rounded, floating card effect inside the cover
+      return (
+        <div className={`flex-1 flex flex-col items-center justify-center text-center p-8 m-4 rounded-[3rem] bg-white/90 backdrop-blur-md shadow-xl print:shadow-none print:bg-transparent print:border print:border-gray-200`}>
+          <div className="my-auto flex flex-col items-center">
+            <div className={`p-6 rounded-full mb-8 ${theme ? `bg-${colorName}-50` : 'bg-gray-50'}`}>
+               <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Kementerian_Agama_new_logo.png" 
+                alt="Logo Kementerian Agama" 
+                className="w-24 h-auto object-contain"
+              />
+            </div>
+            
+            <h1 className={`text-2xl font-bold tracking-wider uppercase mb-3 ${theme?.primary || 'text-slate-900'}`}>
+              {categoryLabel || "Laporan Kinerja"}
+            </h1>
+            {rhkBadge && <span className={`block text-xs mb-3 font-bold tracking-widest ${theme ? `text-${colorName}-400` : 'text-gray-400'}`}>{rhkBadge}</span>}
+            <h2 className={`text-2xl font-medium px-4 mb-8 ${theme ? `text-slate-700` : 'text-gray-700'}`}>
+              {cleanTitle}
+            </h2>
+            <div className={`px-4 py-1.5 rounded-full text-sm font-bold tracking-widest uppercase ${theme ? `bg-${colorName}-100 text-${colorName}-700` : 'bg-gray-100 text-gray-700'}`}>
+              {periode}
+            </div>
+          </div>
+
+          <div className="mt-auto w-full pt-8 flex flex-col items-center">
+            <h3 className="text-xl font-bold text-slate-800 mb-1">
+              {profile.nama}
+            </h3>
+            <p className="text-sm font-mono text-slate-500 mb-6">{profile.nip ? `NIP. ${profile.nip}` : '-'}</p>
+            <div className="flex flex-col items-center space-y-1">
+              <span className="font-bold uppercase text-slate-700">{profile.unitKerja}</span>
+              <span className="text-sm text-slate-500">{profile.kota}</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // DEFAULT / CLASSIC
+    return (
+      <div className={`flex-1 flex flex-col items-center justify-between text-center p-8 ${activeBorderStyle} relative z-10 bg-white/60 backdrop-blur-sm print:bg-transparent`}>
+        <div className="mt-10">
+          <h1 className={`text-2xl font-serif font-bold tracking-widest uppercase mb-4 leading-relaxed px-4 whitespace-pre-line ${theme?.primary || 'text-slate-900'}`}>
+            {categoryLabel || "Laporan Kinerja Guru"}
+          </h1>
+          <h2 className={`text-xl font-serif font-bold uppercase px-4 mt-6 ${theme ? `text-${colorName}-700` : 'text-gray-700'}`}>
+            {rhkBadge && <span className={`block text-sm mb-2 font-sans tracking-widest ${theme ? `text-${colorName}-500` : 'text-gray-500'}`}>{rhkBadge}</span>}
+            {cleanTitle}
+          </h2>
+        </div>
+
+        <div className="my-8 flex flex-col items-center">
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Kementerian_Agama_new_logo.png" 
+            alt="Logo Kementerian Agama" 
+            className="w-32 h-auto mb-6 object-contain"
+          />
+          <p className={`text-lg font-semibold uppercase tracking-wider ${theme ? `text-${colorName}-600` : 'text-gray-600'}`}>
+            Periode: {periode}
+          </p>
+        </div>
+
+        <div className="mb-10 w-full">
+          <p className="text-sm uppercase tracking-widest text-gray-500 mb-4">Disusun Oleh:</p>
+          <h3 className={`text-xl font-bold border-b-2 pb-2 inline-block min-w-[50%] ${theme ? `text-slate-900 border-${colorName}-800` : 'text-slate-900 border-gray-800'}`}>
+            {profile.nama}
+          </h3>
+          <p className="text-lg mt-2 font-mono">{profile.nip ? `NIP. ${profile.nip}` : '-'}</p>
+        </div>
+
+        <div className="w-full mb-4">
+          <h4 className="text-xl font-bold uppercase">{profile.unitKerja}</h4>
+          <p className={`text-md uppercase ${theme ? `text-${colorName}-700` : 'text-gray-600'}`}>{profile.kota}</p>
+          <p className="text-sm text-gray-500 mt-2">2026</p>
+        </div>
+      </div>
+    );
+  };
+
   // Function to render content dynamically based on sections
   const renderDynamicContent = () => {
     return (
@@ -238,53 +420,8 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
           </>
         )}
 
-        {/* Dynamic Border Applied Here */}
-        <div className={`flex-1 flex flex-col items-center justify-between text-center p-8 ${activeBorderStyle} relative z-10 bg-white/40 backdrop-blur-sm print:bg-transparent`}>
-          
-          <div className="mt-10">
-            <h1 className={`text-2xl font-serif font-bold tracking-widest uppercase mb-4 leading-relaxed px-4 whitespace-pre-line ${theme?.primary || 'text-slate-900'}`}>
-              {categoryLabel || "Laporan Kinerja Guru"}
-            </h1>
-            <h2 className={`text-xl font-serif font-bold uppercase px-4 mt-6 ${theme ? `text-${colorName}-700` : 'text-gray-700'}`}>
-              {(() => {
-                const rhkMatch = analysis.judul_terpilih.match(/\[(RHK \d+)\]/);
-                const rhkBadge = rhkMatch ? rhkMatch[1] : null;
-                const cleanTitle = analysis.judul_terpilih.replace(/\[RHK \d+\]\s*/, '');
-                return (
-                  <>
-                    {rhkBadge && <span className={`block text-sm mb-2 font-sans tracking-widest ${theme ? `text-${colorName}-500` : 'text-gray-500'}`}>{rhkBadge}</span>}
-                    {cleanTitle}
-                  </>
-                );
-              })()}
-            </h2>
-          </div>
-
-          <div className="my-8 flex flex-col items-center">
-            <img 
-              src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Kementerian_Agama_new_logo.png" 
-              alt="Logo Kementerian Agama" 
-              className="w-32 h-auto mb-6 object-contain"
-            />
-            <p className={`text-lg font-semibold uppercase tracking-wider ${theme ? `text-${colorName}-600` : 'text-gray-600'}`}>
-              Periode: {periode}
-            </p>
-          </div>
-
-          <div className="mb-10 w-full">
-            <p className="text-sm uppercase tracking-widest text-gray-500 mb-4">Disusun Oleh:</p>
-            <h3 className={`text-xl font-bold border-b-2 pb-2 inline-block min-w-[50%] ${theme ? `text-slate-900 border-${colorName}-800` : 'text-slate-900 border-gray-800'}`}>
-              {profile.nama}
-            </h3>
-            <p className="text-lg mt-2 font-mono">{profile.nip ? `NIP. ${profile.nip}` : '-'}</p>
-          </div>
-
-          <div className="w-full mb-4">
-            <h4 className="text-xl font-bold uppercase">{profile.unitKerja}</h4>
-            <p className={`text-md uppercase ${theme ? `text-${colorName}-700` : 'text-gray-600'}`}>{profile.kota}</p>
-            <p className="text-sm text-gray-500 mt-2">2026</p>
-          </div>
-        </div>
+        {/* Dynamic Cover Applied Here */}
+        {renderCoverContent()}
       </div>
 
       {/* --- HALAMAN 2: ISI LAPORAN (DYNAMIC) --- */}
@@ -339,10 +476,10 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
           </div>
 
           {/* Footer / Signature with Image */}
-          <div className="mt-12 flex justify-end shrink-0">
-            <div className="text-center w-64">
+          <div className="mt-12 flex justify-end shrink-0 px-4">
+            <div className="text-center w-52 flex flex-col">
               <p>{profile.kota}, {tanggalLaporan}</p>
-              <p className="mt-1 mb-2">Guru Penyusun,</p>
+              <p className="mt-1 mb-2">{signatures.right}</p>
               
               {/* Added Signature Image from Google Drive */}
               <div className="h-20 flex items-center justify-center my-2">
@@ -390,10 +527,10 @@ export const ReportView: React.FC<Props> = ({ data, onReset }) => {
              </div>
 
              {/* Footer Signature: Reduced margins */}
-             <div className="mt-2 flex justify-end shrink-0 break-inside-avoid-page">
-                <div className="text-center w-48">
+             <div className="mt-2 flex justify-end shrink-0 break-inside-avoid-page px-8">
+                <div className="text-center w-48 flex flex-col">
                   <p className="text-xs">{profile.kota}, {tanggalLaporan}</p>
-                  <p className="mt-0.5 mb-0 text-xs">Guru Mapel/Kelas,</p>
+                  <p className="mt-0.5 mb-0 text-xs">{signatures.right}</p>
                   
                   <div className="h-14 flex items-center justify-center my-0.5">
                     <img 
