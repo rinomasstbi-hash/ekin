@@ -5,6 +5,11 @@ export interface TeacherProfile {
   kota: string;
   mataPelajaran: string;
   tahunPelaporan: string;
+  stats?: {
+    totalReports: number;
+    todayReports: number;
+    lastReportDate: string;
+  };
 }
 
 export interface ReportSection {

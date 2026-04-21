@@ -40,6 +40,7 @@ const App: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<TeacherProfile | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId | null>(null);
   const [selectedRhkItem, setSelectedRhkItem] = useState<string>('');
@@ -102,6 +103,7 @@ const App: React.FC = () => {
       };
       await setDoc(doc(db, 'users', user.uid), profileData);
       setProfile(newProfile);
+      setIsEditingProfile(false);
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, `users/${user.uid}`);
       alert("Gagal menyimpan profil.");
@@ -109,7 +111,7 @@ const App: React.FC = () => {
   };
 
   const handleChangeProfile = () => {
-    setProfile(null);
+    setIsEditingProfile(true);
     setReportData(null);
     setSelectedCategoryId(null);
   };
@@ -118,6 +120,7 @@ const App: React.FC = () => {
     try {
       await signOut(auth);
       setProfile(null);
+      setIsEditingProfile(false);
       setReportData(null);
       setSelectedCategoryId(null);
     } catch (error) {
@@ -207,9 +210,28 @@ const App: React.FC = () => {
       // Generate random border index (0 to 4)
       const randomBorderIndex = Math.floor(Math.random() * 5);
 
+      // Update User Statistics
+      const today = new Date().toISOString().split('T')[0];
+      const currentStats = profile.stats || { totalReports: 0, todayReports: 0, lastReportDate: '' };
+      
+      const newStats = {
+        totalReports: currentStats.totalReports + 1,
+        todayReports: currentStats.lastReportDate === today ? currentStats.todayReports + 1 : 1,
+        lastReportDate: today
+      };
+
+      const updatedProfile = { ...profile, stats: newStats };
+      setProfile(updatedProfile);
+      
+      if (user) {
+         setDoc(doc(db, 'users', user.uid), { stats: newStats }, { merge: true }).catch(err => {
+            console.error("Gagal menyimpan statistik: ", err);
+         });
+      }
+
       const newReport: ReportData = {
         images: selectedImages,
-        profile: profile,
+        profile: updatedProfile,
         periode: `${q?.label} (${q?.range})`, 
         analysis: result,
         tanggalLaporan: `${randomMonth} ${profile.tahunPelaporan || '2026'}`,
@@ -287,7 +309,7 @@ const App: React.FC = () => {
     return <ReportView data={reportData} onReset={resetAll} />;
   }
 
-  if (!profile) {
+  if (!profile || isEditingProfile) {
     return (
       <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4 relative">
         <button 
@@ -297,10 +319,22 @@ const App: React.FC = () => {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
           <span className="text-sm font-medium">Sign Out</span>
         </button>
-        <ProfileForm initialProfile={null} onSave={handleSaveProfile} />
+        {profile && isEditingProfile && (
+           <button 
+             onClick={() => setIsEditingProfile(false)}
+             className="absolute top-6 left-6 flex items-center gap-2 text-slate-500 hover:text-blue-500 transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200"
+           >
+             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+             <span className="text-sm font-medium">Kembali</span>
+           </button>
+        )}
+        <ProfileForm initialProfile={profile} onSave={handleSaveProfile} />
       </div>
     );
   }
+
+  // NOTE: There is an explicit `handleChangeProfile` which sets `profile` to `null`.
+  // We need a specific editing state for the profile, otherwise it assumes no profile exists at all.
 
   if (!selectedCategoryId) {
     // Helper function to shorten titles for the small grid layout
@@ -357,8 +391,12 @@ const App: React.FC = () => {
                  <div className="text-[10px] sm:text-xs text-blue-200 mt-1">Tahun Laporan</div>
                </div>
                <div className="flex-1 text-center">
-                 <div className="text-2xl font-bold">{profile.nip ? profile.nip.slice(0, 6) + "..." : "-"}</div>
-                 <div className="text-[10px] sm:text-xs text-blue-200 mt-1">Status Kepegawaian</div>
+                 <div className="text-2xl font-bold flex items-center justify-center">
+                   <span>{profile.stats?.lastReportDate === new Date().toISOString().split('T')[0] ? profile.stats?.todayReports || 0 : 0}</span> 
+                   <span className="text-lg font-light text-blue-300 mx-1.5">/</span> 
+                   <span>{profile.stats?.totalReports || 0}</span>
+                 </div>
+                 <div className="text-[10px] sm:text-xs text-blue-200 mt-1">Laporan Hari Ini / Total</div>
                </div>
             </div>
           </div>
