@@ -39,7 +39,8 @@ export const analyzeImageWithGemini = async (
   userNote?: string, // Used as 'Materi/Bab' for assessment
   studentNames?: string, // New param for list of students
   kelas?: string, // New param for class
-  selectedRhkItem?: string // New param for specific RHK
+  selectedRhkItem?: string, // New param for specific RHK
+  prestasiSiswa?: string // Input for specific rank & name of achieving student
 ): Promise<AnalysisResult> => {
   const ai = new GoogleGenAI({ apiKey });
   const model = "gemini-2.5-flash"; 
@@ -146,15 +147,17 @@ export const analyzeImageWithGemini = async (
   if (studentNames && (categoryId === 'RELIGIOUS_MODERATION' || categoryId === 'TEACHING' || categoryId === 'COMPETITION' || categoryId === 'TALENT' || categoryId === 'HEALTH' || categoryId === 'CUSTOM')) {
     
     let focusValue = "";
-    let gradingInstruction = "";
+      let gradingInstruction = "";
+      
+      const prestasiInstruction = prestasiSiswa ? ` (BERIKAN PREDIKAT 'SB'/SANGAT BERBAKAT TERUTAMA UNTUK SISWA-SISWA BERIKUT DAN MEREKA ADALAH: ${prestasiSiswa})` : "";
 
-    if (categoryId === 'COMPETITION') {
-      focusValue = "Kategori/Cabang Lomba";
-      gradingInstruction = "Untuk 'predikat', gunakan kode berikut: 'SB' = Juara/Terbaik, 'B' = Finalis/Baik, 'C' = Peserta. Di 'deskripsi', tuliskan capaian spesifik (Juara 1, Harapan 2, Peserta Aktif, dll).";
-    } else if (categoryId === 'TALENT') {
-      focusValue = "Bidang Bakat/Minat";
-      gradingInstruction = "Untuk 'predikat', gunakan 'SB' (Sangat Berbakat), 'B' (Berbakat), 'C' (Cukup), 'K' (Kurang). Di 'deskripsi', tuliskan potensi spesifik siswa.";
-    } else if (categoryId === 'HEALTH') {
+      if (categoryId === 'COMPETITION') {
+        focusValue = "Kategori/Cabang Lomba";
+        gradingInstruction = `Untuk 'predikat', gunakan kode berikut: 'SB' = Juara/Terbaik, 'B' = Finalis/Baik, 'C' = Peserta. Di 'deskripsi', tuliskan capaian spesifik (Juara 1, Harapan 2, Peserta Aktif, dll).${prestasiInstruction}`;
+      } else if (categoryId === 'TALENT') {
+        focusValue = "Bidang Bakat/Minat";
+        gradingInstruction = `Untuk 'predikat', gunakan 'SB' (Sangat Berbakat), 'B' (Berbakat), 'C' (Cukup), 'K' (Kurang). Di 'deskripsi', tuliskan potensi spesifik siswa.${prestasiInstruction}`;
+      } else if (categoryId === 'HEALTH') {
       focusValue = "Fokus Pemeriksaan/Pembinaan";
       gradingInstruction = "Untuk 'predikat', gunakan 'SB' (Sangat Sehat/Paham), 'B' (Sehat/Paham), 'C' (Cukup), 'K' (Kurang). Di 'deskripsi', tuliskan hasil pemeriksaan atau tingkat pemahaman.";
     } else if (categoryId === 'CUSTOM') {

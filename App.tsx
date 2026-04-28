@@ -50,6 +50,7 @@ const App: React.FC = () => {
   // States for Student Assessment (Hybrid Mode)
   const [studentNames, setStudentNames] = useState<string>('');
   const [kelas, setKelas] = useState<string>('');
+  const [prestasiSiswa, setPrestasiSiswa] = useState<string>('');
 
   const [userNote, setUserNote] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -189,7 +190,8 @@ const App: React.FC = () => {
         userNote,
         studentNames,
         kelas,
-        selectedRhkItem
+        selectedRhkItem,
+        prestasiSiswa
       );
       const categoryConfig = RHK_CATEGORIES.find(c => c.id === selectedCategoryId);
       
@@ -254,6 +256,7 @@ const App: React.FC = () => {
     setUserNote(''); 
     setStudentNames('');
     setKelas('');
+    setPrestasiSiswa('');
     setSelectedRhkItem('');
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -265,6 +268,7 @@ const App: React.FC = () => {
     setUserNote('');
     setStudentNames('');
     setKelas('');
+    setPrestasiSiswa('');
     setSelectedRhkItem('');
     setError(null);
   };
@@ -586,6 +590,21 @@ const App: React.FC = () => {
                   disabled={isAnalyzing}
                 />
               </div>
+
+              {(selectedCategoryId === 'TALENT' || selectedCategoryId === 'COMPETITION') && (
+                <div className="pt-2 border-t border-slate-200">
+                   <label className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-2 block">Siswa Berprestasi (Opsional)</label>
+                   <input
+                    type="text"
+                    value={prestasiSiswa}
+                    onChange={(e) => setPrestasiSiswa(e.target.value)}
+                    placeholder="Contoh: Juara 1 (Ahmad), Berbakat (Siti)"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:ring-0 outline-none transition-all text-slate-700 bg-white placeholder-slate-400"
+                    disabled={isAnalyzing}
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Sebutkan nama siswa dari daftar di atas yang meraih peringkat/prestasi khusus.</p>
+                </div>
+              )}
             </div>
           )}
 
